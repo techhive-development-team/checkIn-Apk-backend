@@ -14,18 +14,76 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
-  posts Post[]
+model Company {
+  companyId       String   @id @default(uuid())
+  name            String
+  logo            String?
+  companyType     String?
+  address         String?
+  phone           String?
+  email           String?  @unique
+  totalEmployee   String?
+  subScribeStatus String   @default("Inactive")
+  status          String   @default("active")
+  createdAt       DateTime @default(now())
+
+  employees Employee[]
+  users     User[]
+
+  @@map("companies")
 }
 
-model Post {
-  id        Int      @id @default(autoincrement())
-  title     String
-  content   String?
-  published Boolean? @default(false)
-  author    User?    @relation(fields: [authorId], references: [id])
-  authorId  Int?
+model Employee {
+  employeeId String   @id @default(uuid())
+  companyId  String
+  profilePic String?
+  firstName  String
+  lastName   String
+  position   String?
+  email      String   @unique
+  phone      String?
+  address    String?
+  status     String   @default("active")
+  createdAt  DateTime @default(now())
+
+  company    Company      @relation(fields: [companyId], references: [companyId])
+  attendance Attendance[]
+  user       User?
+
+  @@map("employees")
+}
+
+model Attendance {
+  id               String    @id @default(uuid())
+  date             DateTime  @default(now()) @db.Date
+  checkInTime      DateTime
+  checkInPhoto     String?
+  checkInLocation  String?
+  checkOutTime     DateTime?
+  checkOutPhoto    String?
+  checkOutLocation String?
+  status           String    @default("present")
+  employeeId       String
+  createdAt        DateTime  @default(now())
+
+  employee Employee @relation(fields: [employeeId], references: [employeeId])
+
+  @@map("attendance")
+}
+
+model User {
+  userId     String   @id @default(uuid())
+  password   String?
+  googleId   String?  @unique
+  role       String
+  status     String   @default("active")
+  companyId  String?
+  employeeId String?
+  createdAt  DateTime @default(now())
+
+  company  Company?  @relation(fields: [companyId], references: [companyId])
+  employee Employee? @relation(fields: [employeeId], references: [employeeId], onDelete: Cascade)
+
+  @@unique([employeeId])
+  @@map("users")
 }
