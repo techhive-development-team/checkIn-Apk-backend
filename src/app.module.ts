@@ -8,6 +8,7 @@ import { UserModule } from './modules/user/user.module';
 import { PrismaService } from './common/config/prisma/prisma.service';
 import { join } from 'path';
 import { PrismaModule } from './common/config/prisma/prisma.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -23,7 +24,8 @@ import { PrismaModule } from './common/config/prisma/prisma.module';
       dest: './uploads/images',
     }),
     UserModule,
-    PrismaModule
+    PrismaModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
