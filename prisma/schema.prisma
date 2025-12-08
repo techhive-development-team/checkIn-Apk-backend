@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider     = "prisma-client"
   output       = "../src/generated/prisma"
@@ -15,42 +9,36 @@ datasource db {
 }
 
 model Company {
-  companyId       String   @id @default(uuid())
+  companyId       String     @id @default(uuid())
   name            String
   logo            String?
   companyType     String?
   address         String?
   phone           String?
-  email           String?  @unique
+  email           String?    @unique
   totalEmployee   String?
-  subScribeStatus String   @default("Inactive")
-  status          String   @default("active")
-  createdAt       DateTime @default(now())
-
-  employees Employee[]
-  users     User[]
-
-  @@map("companies")
+  subScribeStatus String     @default("Inactive")
+  status          String     @default("active")
+  createdAt       DateTime   @default(now())
+  employees       Employee[]
+  users           User[]
 }
 
 model Employee {
-  employeeId String   @id @default(uuid())
+  employeeId String       @id @default(uuid())
   companyId  String
   profilePic String?
   firstName  String
   lastName   String
   position   String?
-  email      String   @unique
+  email      String       @unique
   phone      String?
   address    String?
-  status     String   @default("active")
-  createdAt  DateTime @default(now())
-
-  company    Company      @relation(fields: [companyId], references: [companyId])
+  status     String       @default("active")
+  createdAt  DateTime     @default(now())
   attendance Attendance[]
+  company    Company      @relation(fields: [companyId], references: [companyId])
   user       User?
-
-  @@map("employees")
 }
 
 model Attendance {
@@ -65,25 +53,18 @@ model Attendance {
   status           String    @default("present")
   employeeId       String
   createdAt        DateTime  @default(now())
-
-  employee Employee @relation(fields: [employeeId], references: [employeeId])
-
-  @@map("attendance")
+  employee         Employee  @relation(fields: [employeeId], references: [employeeId])
 }
 
 model User {
-  userId     String   @id @default(uuid())
+  userId     String    @id @default(uuid())
   password   String?
-  googleId   String?  @unique
+  googleId   String?   @unique
   role       String
-  status     String   @default("active")
+  status     String    @default("active")
   companyId  String?
-  employeeId String?
-  createdAt  DateTime @default(now())
-
-  company  Company?  @relation(fields: [companyId], references: [companyId])
-  employee Employee? @relation(fields: [employeeId], references: [employeeId], onDelete: Cascade)
-
-  @@unique([employeeId])
-  @@map("users")
+  employeeId String?   @unique
+  createdAt  DateTime  @default(now())
+  company    Company?  @relation(fields: [companyId], references: [companyId])
+  employee   Employee? @relation(fields: [employeeId], references: [employeeId], onDelete: Cascade)
 }
