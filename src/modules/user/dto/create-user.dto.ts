@@ -13,6 +13,11 @@ enum UserStatus {
 }
 
 export class CreateUserDto {
+
+  @IsNotEmpty()
+  @IsString()
+  public email: string;
+
   @IsString()
   @IsOptional()
   @Transform(({ value }) => value?.trim())

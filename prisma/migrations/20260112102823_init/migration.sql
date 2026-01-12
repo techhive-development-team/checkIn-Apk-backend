@@ -1,35 +1,5 @@
-/*
-  Warnings:
-
-  - You are about to drop the `attendance` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `companies` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `employees` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `users` table. If the table is not empty, all the data it contains will be lost.
-
-*/
--- DropForeignKey
-ALTER TABLE "attendance" DROP CONSTRAINT "attendance_employeeId_fkey";
-
--- DropForeignKey
-ALTER TABLE "employees" DROP CONSTRAINT "employees_companyId_fkey";
-
--- DropForeignKey
-ALTER TABLE "users" DROP CONSTRAINT "users_companyId_fkey";
-
--- DropForeignKey
-ALTER TABLE "users" DROP CONSTRAINT "users_employeeId_fkey";
-
--- DropTable
-DROP TABLE "attendance";
-
--- DropTable
-DROP TABLE "companies";
-
--- DropTable
-DROP TABLE "employees";
-
--- DropTable
-DROP TABLE "users";
+-- CreateEnum
+CREATE TYPE "Role" AS ENUM ('ADMIN', 'CLIENT', 'USER');
 
 -- CreateTable
 CREATE TABLE "Company" (
@@ -39,7 +9,7 @@ CREATE TABLE "Company" (
     "companyType" TEXT,
     "address" TEXT,
     "phone" TEXT,
-    "email" TEXT,
+    "email" TEXT NOT NULL,
     "totalEmployee" TEXT,
     "subScribeStatus" TEXT NOT NULL DEFAULT 'Inactive',
     "status" TEXT NOT NULL DEFAULT 'active',
@@ -68,7 +38,7 @@ CREATE TABLE "Employee" (
 -- CreateTable
 CREATE TABLE "Attendance" (
     "id" TEXT NOT NULL,
-    "date" DATE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "date" DATE NOT NULL,
     "checkInTime" TIMESTAMP(3) NOT NULL,
     "checkInPhoto" TEXT,
     "checkInLocation" TEXT,
@@ -85,9 +55,10 @@ CREATE TABLE "Attendance" (
 -- CreateTable
 CREATE TABLE "User" (
     "userId" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
     "password" TEXT,
     "googleId" TEXT,
-    "role" TEXT NOT NULL,
+    "role" "Role" NOT NULL DEFAULT 'USER',
     "status" TEXT NOT NULL DEFAULT 'active',
     "companyId" TEXT,
     "employeeId" TEXT,
@@ -103,7 +74,13 @@ CREATE UNIQUE INDEX "Company_email_key" ON "Company"("email");
 CREATE UNIQUE INDEX "Employee_email_key" ON "Employee"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "User_googleId_key" ON "User"("googleId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_companyId_key" ON "User"("companyId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_employeeId_key" ON "User"("employeeId");
@@ -115,7 +92,7 @@ ALTER TABLE "Employee" ADD CONSTRAINT "Employee_companyId_fkey" FOREIGN KEY ("co
 ALTER TABLE "Attendance" ADD CONSTRAINT "Attendance_employeeId_fkey" FOREIGN KEY ("employeeId") REFERENCES "Employee"("employeeId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "User" ADD CONSTRAINT "User_companyId_fkey" FOREIGN KEY ("companyId") REFERENCES "Company"("companyId") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "User" ADD CONSTRAINT "User_companyId_fkey" FOREIGN KEY ("companyId") REFERENCES "Company"("companyId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "User" ADD CONSTRAINT "User_employeeId_fkey" FOREIGN KEY ("employeeId") REFERENCES "Employee"("employeeId") ON DELETE CASCADE ON UPDATE CASCADE;

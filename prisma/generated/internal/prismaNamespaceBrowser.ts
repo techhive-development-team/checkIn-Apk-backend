@@ -126,6 +126,7 @@ export type AttendanceScalarFieldEnum = (typeof AttendanceScalarFieldEnum)[keyof
 
 export const UserScalarFieldEnum = {
   userId: 'userId',
+  email: 'email',
   password: 'password',
   googleId: 'googleId',
   role: 'role',

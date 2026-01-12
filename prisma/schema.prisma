@@ -15,7 +15,7 @@ model Company {
   companyType     String?
   address         String?
   phone           String?
-  email           String?  @unique
+  email           String  @unique
   totalEmployee   String?
   subScribeStatus String   @default("Inactive")
   status          String   @default("active")

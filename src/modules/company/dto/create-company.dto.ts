@@ -21,8 +21,8 @@ export class CreateCompanyDto {
     @IsString()
     phone: string;
 
-    @IsOptional()
     @IsString()
+    @IsNotEmpty()
     email: string;
 
     @IsOptional()

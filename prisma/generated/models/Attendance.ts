@@ -302,7 +302,7 @@ export type AttendanceScalarWhereWithAggregatesInput = {
 
 export type AttendanceCreateInput = {
   id?: string
-  date?: Date | string
+  date: Date | string
   checkInTime: Date | string
   checkInPhoto?: string | null
   checkInLocation?: string | null
@@ -316,7 +316,7 @@ export type AttendanceCreateInput = {
 
 export type AttendanceUncheckedCreateInput = {
   id?: string
-  date?: Date | string
+  date: Date | string
   checkInTime: Date | string
   checkInPhoto?: string | null
   checkInLocation?: string | null
@@ -358,7 +358,7 @@ export type AttendanceUncheckedUpdateInput = {
 
 export type AttendanceCreateManyInput = {
   id?: string
-  date?: Date | string
+  date: Date | string
   checkInTime: Date | string
   checkInPhoto?: string | null
   checkInLocation?: string | null
@@ -497,7 +497,7 @@ export type NullableDateTimeFieldUpdateOperationsInput = {
 
 export type AttendanceCreateWithoutEmployeeInput = {
   id?: string
-  date?: Date | string
+  date: Date | string
   checkInTime: Date | string
   checkInPhoto?: string | null
   checkInLocation?: string | null
@@ -510,7 +510,7 @@ export type AttendanceCreateWithoutEmployeeInput = {
 
 export type AttendanceUncheckedCreateWithoutEmployeeInput = {
   id?: string
-  date?: Date | string
+  date: Date | string
   checkInTime: Date | string
   checkInPhoto?: string | null
   checkInLocation?: string | null
@@ -566,7 +566,7 @@ export type AttendanceScalarWhereInput = {
 
 export type AttendanceCreateManyEmployeeInput = {
   id?: string
-  date?: Date | string
+  date: Date | string
   checkInTime: Date | string
   checkInPhoto?: string | null
   checkInLocation?: string | null
