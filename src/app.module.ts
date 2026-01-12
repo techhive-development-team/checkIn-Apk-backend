@@ -1,14 +1,16 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { MulterModule } from '@nestjs/platform-express';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './modules/user/user.module';
-import { PrismaService } from './common/config/prisma/prisma.service';
+import { PrismaService } from './prisma.service';
 import { join } from 'path';
-import { PrismaModule } from './common/config/prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { EmployeeModule } from './modules/employee/employee.module';
+import { CompanyModule } from './modules/company/company.module';
 
 @Module({
   imports: [
@@ -24,10 +26,16 @@ import { AuthModule } from './modules/auth/auth.module';
       dest: './uploads/images',
     }),
     UserModule,
-    PrismaModule,
-    AuthModule
+    AuthModule,
+    EmployeeModule,
+    CompanyModule
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware)
+      .forRoutes('cats');
+  }
+}

@@ -12,10 +12,11 @@ export class AuthController {
     
   }
 
-  // ✅ Google Callback URL
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   async googleAuthRedirect(@Req() req) {
     return this.authService.googleLogin(req.user);
   }
+
+  
 }

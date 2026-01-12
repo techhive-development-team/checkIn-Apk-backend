@@ -1,20 +1,32 @@
 import { Injectable } from '@nestjs/common';
+import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class AuthService {
-  async googleLogin(user: any) {
-    if (!user) {
+  constructor(private prisma: PrismaService) { }
+
+  async googleLogin(data: any) {
+    if (!data) {
       return 'No user from Google';
     }
-
-    // ✅ Here you should:
-    // 1. Find user in DB by email
-    // 2. If not exist → create user
-    // 3. Generate JWT Token
-
+    const company = await this.prisma.company.findUnique({
+      where: {
+        email: data.email,
+      },
+    });
+    if (!company) {
+      await this.prisma.company.create({
+        data: {
+          name: `${data.firstName} ${data.lastName}`,
+          email: data.email,
+          logo: data.picture,
+        },
+      });
+    }
+    
     return {
       message: 'Google login successful',
-      user,
+      data,
     };
   }
 }

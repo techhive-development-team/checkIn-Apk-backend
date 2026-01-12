@@ -1,6 +1,6 @@
 generator client {
   provider     = "prisma-client"
-  output       = "../src/generated/prisma"
+  output       = "./generated"
   moduleFormat = "cjs"
 }
 
@@ -9,33 +9,35 @@ datasource db {
 }
 
 model Company {
-  companyId       String     @id @default(uuid())
+  companyId       String   @id @default(uuid())
   name            String
   logo            String?
   companyType     String?
   address         String?
   phone           String?
-  email           String?    @unique
+  email           String?  @unique
   totalEmployee   String?
-  subScribeStatus String     @default("Inactive")
-  status          String     @default("active")
-  createdAt       DateTime   @default(now())
-  employees       Employee[]
-  users           User[]
+  subScribeStatus String   @default("Inactive")
+  status          String   @default("active")
+  createdAt       DateTime @default(now())
+
+  employees Employee[]
+  users     User[]
 }
 
 model Employee {
-  employeeId String       @id @default(uuid())
+  employeeId String   @id @default(uuid())
   companyId  String
   profilePic String?
   firstName  String
   lastName   String
   position   String?
-  email      String       @unique
+  email      String   @unique
   phone      String?
   address    String?
-  status     String       @default("active")
-  createdAt  DateTime     @default(now())
+  status     String   @default("active")
+  createdAt  DateTime @default(now())
+
   attendance Attendance[]
   company    Company      @relation(fields: [companyId], references: [companyId])
   user       User?
@@ -43,7 +45,7 @@ model Employee {
 
 model Attendance {
   id               String    @id @default(uuid())
-  date             DateTime  @default(now()) @db.Date
+  date             DateTime  @db.Date
   checkInTime      DateTime
   checkInPhoto     String?
   checkInLocation  String?
@@ -53,18 +55,27 @@ model Attendance {
   status           String    @default("present")
   employeeId       String
   createdAt        DateTime  @default(now())
-  employee         Employee  @relation(fields: [employeeId], references: [employeeId])
+
+  employee Employee @relation(fields: [employeeId], references: [employeeId])
+}
+
+enum Role {
+  ADMIN
+  CLIENT
+  USER
 }
 
 model User {
-  userId     String    @id @default(uuid())
+  userId     String   @id @default(uuid())
+  email      String   @unique
   password   String?
-  googleId   String?   @unique
-  role       String
-  status     String    @default("active")
-  companyId  String?
-  employeeId String?   @unique
-  createdAt  DateTime  @default(now())
-  company    Company?  @relation(fields: [companyId], references: [companyId])
-  employee   Employee? @relation(fields: [employeeId], references: [employeeId], onDelete: Cascade)
+  googleId   String?  @unique
+  role       Role     @default(USER)
+  status     String   @default("active")
+  companyId  String?  @unique
+  employeeId String?  @unique
+  createdAt  DateTime @default(now())
+
+  company  Company?  @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
+  employee Employee? @relation(fields: [employeeId], references: [employeeId], onDelete: Cascade)
 }
