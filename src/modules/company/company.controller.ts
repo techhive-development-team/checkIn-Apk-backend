@@ -17,8 +17,8 @@ export class CompanyController {
   @UseGuards(JwtAuthGuard)
   @Get()
   findAll(@Query() filterDto: CompanyFilterDto, @Req() req) {
-    console.log(req);
-    return req.user;
+    // console.log(req);
+    // return req.user;
     return this.companyService.findAll(filterDto);
   }
 
