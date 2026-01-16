@@ -8,9 +8,6 @@ import {
 
 export class CreateEmployeeDto {
 
-    @IsNotEmpty()
-    companyId: string;
-
     @IsOptional()
     @IsString()
     profilePic?: string;

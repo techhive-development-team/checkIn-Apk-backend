@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Req } from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
+import { CompanyFilterDto } from './dto/filter-company.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('company')
 export class CompanyController {
@@ -12,9 +14,12 @@ export class CompanyController {
     return this.companyService.create(createCompanyDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
-  findAll() {
-    return this.companyService.findAll();
+  findAll(@Query() filterDto: CompanyFilterDto, @Req() req) {
+    console.log(req);
+    return req.user;
+    return this.companyService.findAll(filterDto);
   }
 
   @Get(':id')

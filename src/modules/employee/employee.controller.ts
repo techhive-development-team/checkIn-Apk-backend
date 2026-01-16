@@ -1,34 +1,49 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe } from '@nestjs/common';
 import { EmployeeService } from './employee.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 
 @Controller('employee')
 export class EmployeeController {
-  constructor(private readonly employeeService: EmployeeService) {}
+  constructor(private readonly employeeService: EmployeeService) { }
 
-  @Post()
-  create(@Body() createEmployeeDto: CreateEmployeeDto) {
-    return this.employeeService.create(createEmployeeDto);
+  @Get('')
+
+  @Post(':companyId')
+  createByCompany(
+    @Param('companyId') companyId: string,
+    @Body() createEmployeeDto: CreateEmployeeDto) {
+    return this.employeeService.createByCompanyId(companyId, createEmployeeDto);
   }
 
-  @Get()
-  findAll() {
-    return this.employeeService.findAll();
+  @Get(':companyId')
+  findByCompanyId(
+    @Param('companyId') companyId: string,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit = 10,
+    @Query('offset', new ParseIntPipe({ optional: true })) offset = 0,
+  ) {
+    return this.employeeService.findByCompanyId({ companyId, limit, offset });
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.employeeService.findOne(id);
+  @Get(':companyId/:employeeId')
+  findOneByCompanyId(
+    @Param('companyId') companyId: string,
+    @Param('employeeId') employeeId: string) {
+    return this.employeeService.findOneByCompanyIdAndEmployeeId(companyId, employeeId);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateEmployeeDto: UpdateEmployeeDto) {
-    return this.employeeService.update(id, updateEmployeeDto);
+  @Patch(':companyId/:employeeId')
+  updateByCompanyId(
+    @Param('companyId') companyId: string,
+    @Param('employeeId') employeeId: string, @Body() updateEmployeeDto: UpdateEmployeeDto) {
+    return this.employeeService.update(companyId, employeeId, updateEmployeeDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.employeeService.remove(id);
+  @Delete(':companyId/:employeeId')
+  removeByCompanyId(
+    @Param('companyId') companyId: string,
+    @Param('employeeId') employeeId: string) {
+    return this.employeeService.remove(companyId, employeeId);
   }
+
 }

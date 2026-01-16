@@ -34,6 +34,7 @@ export type UserMinAggregateOutputType = {
   companyId: string | null
   employeeId: string | null
   createdAt: Date | null
+  deletedAt: Date | null
 }
 
 export type UserMaxAggregateOutputType = {
@@ -46,6 +47,7 @@ export type UserMaxAggregateOutputType = {
   companyId: string | null
   employeeId: string | null
   createdAt: Date | null
+  deletedAt: Date | null
 }
 
 export type UserCountAggregateOutputType = {
@@ -58,6 +60,7 @@ export type UserCountAggregateOutputType = {
   companyId: number
   employeeId: number
   createdAt: number
+  deletedAt: number
   _all: number
 }
 
@@ -72,6 +75,7 @@ export type UserMinAggregateInputType = {
   companyId?: true
   employeeId?: true
   createdAt?: true
+  deletedAt?: true
 }
 
 export type UserMaxAggregateInputType = {
@@ -84,6 +88,7 @@ export type UserMaxAggregateInputType = {
   companyId?: true
   employeeId?: true
   createdAt?: true
+  deletedAt?: true
 }
 
 export type UserCountAggregateInputType = {
@@ -96,6 +101,7 @@ export type UserCountAggregateInputType = {
   companyId?: true
   employeeId?: true
   createdAt?: true
+  deletedAt?: true
   _all?: true
 }
 
@@ -181,6 +187,7 @@ export type UserGroupByOutputType = {
   companyId: string | null
   employeeId: string | null
   createdAt: Date
+  deletedAt: Date | null
   _count: UserCountAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
@@ -214,6 +221,7 @@ export type UserWhereInput = {
   companyId?: Prisma.StringNullableFilter<"User"> | string | null
   employeeId?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   company?: Prisma.XOR<Prisma.CompanyNullableScalarRelationFilter, Prisma.CompanyWhereInput> | null
   employee?: Prisma.XOR<Prisma.EmployeeNullableScalarRelationFilter, Prisma.EmployeeWhereInput> | null
 }
@@ -228,6 +236,7 @@ export type UserOrderByWithRelationInput = {
   companyId?: Prisma.SortOrderInput | Prisma.SortOrder
   employeeId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   company?: Prisma.CompanyOrderByWithRelationInput
   employee?: Prisma.EmployeeOrderByWithRelationInput
 }
@@ -245,6 +254,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
   status?: Prisma.StringFilter<"User"> | string
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   company?: Prisma.XOR<Prisma.CompanyNullableScalarRelationFilter, Prisma.CompanyWhereInput> | null
   employee?: Prisma.XOR<Prisma.EmployeeNullableScalarRelationFilter, Prisma.EmployeeWhereInput> | null
 }, "userId" | "email" | "googleId" | "companyId" | "employeeId">
@@ -259,6 +269,7 @@ export type UserOrderByWithAggregationInput = {
   companyId?: Prisma.SortOrderInput | Prisma.SortOrder
   employeeId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
   _min?: Prisma.UserMinOrderByAggregateInput
@@ -277,6 +288,7 @@ export type UserScalarWhereWithAggregatesInput = {
   companyId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   employeeId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
 }
 
 export type UserCreateInput = {
@@ -287,6 +299,7 @@ export type UserCreateInput = {
   role?: $Enums.Role
   status?: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
   company?: Prisma.CompanyCreateNestedOneWithoutUsersInput
   employee?: Prisma.EmployeeCreateNestedOneWithoutUserInput
 }
@@ -301,6 +314,7 @@ export type UserUncheckedCreateInput = {
   companyId?: string | null
   employeeId?: string | null
   createdAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type UserUpdateInput = {
@@ -311,6 +325,7 @@ export type UserUpdateInput = {
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   company?: Prisma.CompanyUpdateOneWithoutUsersNestedInput
   employee?: Prisma.EmployeeUpdateOneWithoutUserNestedInput
 }
@@ -325,6 +340,7 @@ export type UserUncheckedUpdateInput = {
   companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   employeeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type UserCreateManyInput = {
@@ -337,6 +353,7 @@ export type UserCreateManyInput = {
   companyId?: string | null
   employeeId?: string | null
   createdAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type UserUpdateManyMutationInput = {
@@ -347,6 +364,7 @@ export type UserUpdateManyMutationInput = {
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type UserUncheckedUpdateManyInput = {
@@ -359,6 +377,7 @@ export type UserUncheckedUpdateManyInput = {
   companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   employeeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type UserListRelationFilter = {
@@ -386,6 +405,7 @@ export type UserCountOrderByAggregateInput = {
   companyId?: Prisma.SortOrder
   employeeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -398,6 +418,7 @@ export type UserMaxOrderByAggregateInput = {
   companyId?: Prisma.SortOrder
   employeeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
@@ -410,6 +431,7 @@ export type UserMinOrderByAggregateInput = {
   companyId?: Prisma.SortOrder
   employeeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type UserCreateNestedManyWithoutCompanyInput = {
@@ -498,6 +520,7 @@ export type UserCreateWithoutCompanyInput = {
   role?: $Enums.Role
   status?: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
   employee?: Prisma.EmployeeCreateNestedOneWithoutUserInput
 }
 
@@ -510,6 +533,7 @@ export type UserUncheckedCreateWithoutCompanyInput = {
   status?: string
   employeeId?: string | null
   createdAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type UserCreateOrConnectWithoutCompanyInput = {
@@ -551,6 +575,7 @@ export type UserScalarWhereInput = {
   companyId?: Prisma.StringNullableFilter<"User"> | string | null
   employeeId?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
 }
 
 export type UserCreateWithoutEmployeeInput = {
@@ -561,6 +586,7 @@ export type UserCreateWithoutEmployeeInput = {
   role?: $Enums.Role
   status?: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
   company?: Prisma.CompanyCreateNestedOneWithoutUsersInput
 }
 
@@ -573,6 +599,7 @@ export type UserUncheckedCreateWithoutEmployeeInput = {
   status?: string
   companyId?: string | null
   createdAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type UserCreateOrConnectWithoutEmployeeInput = {
@@ -599,6 +626,7 @@ export type UserUpdateWithoutEmployeeInput = {
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   company?: Prisma.CompanyUpdateOneWithoutUsersNestedInput
 }
 
@@ -611,6 +639,7 @@ export type UserUncheckedUpdateWithoutEmployeeInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type UserCreateManyCompanyInput = {
@@ -622,6 +651,7 @@ export type UserCreateManyCompanyInput = {
   status?: string
   employeeId?: string | null
   createdAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type UserUpdateWithoutCompanyInput = {
@@ -632,6 +662,7 @@ export type UserUpdateWithoutCompanyInput = {
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   employee?: Prisma.EmployeeUpdateOneWithoutUserNestedInput
 }
 
@@ -644,6 +675,7 @@ export type UserUncheckedUpdateWithoutCompanyInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   employeeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type UserUncheckedUpdateManyWithoutCompanyInput = {
@@ -655,6 +687,7 @@ export type UserUncheckedUpdateManyWithoutCompanyInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   employeeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -669,6 +702,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   companyId?: boolean
   employeeId?: boolean
   createdAt?: boolean
+  deletedAt?: boolean
   company?: boolean | Prisma.User$companyArgs<ExtArgs>
   employee?: boolean | Prisma.User$employeeArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
@@ -683,6 +717,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   companyId?: boolean
   employeeId?: boolean
   createdAt?: boolean
+  deletedAt?: boolean
   company?: boolean | Prisma.User$companyArgs<ExtArgs>
   employee?: boolean | Prisma.User$employeeArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
@@ -697,6 +732,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   companyId?: boolean
   employeeId?: boolean
   createdAt?: boolean
+  deletedAt?: boolean
   company?: boolean | Prisma.User$companyArgs<ExtArgs>
   employee?: boolean | Prisma.User$employeeArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
@@ -711,9 +747,10 @@ export type UserSelectScalar = {
   companyId?: boolean
   employeeId?: boolean
   createdAt?: boolean
+  deletedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"userId" | "email" | "password" | "googleId" | "role" | "status" | "companyId" | "employeeId" | "createdAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"userId" | "email" | "password" | "googleId" | "role" | "status" | "companyId" | "employeeId" | "createdAt" | "deletedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   company?: boolean | Prisma.User$companyArgs<ExtArgs>
   employee?: boolean | Prisma.User$employeeArgs<ExtArgs>
@@ -743,6 +780,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     companyId: string | null
     employeeId: string | null
     createdAt: Date
+    deletedAt: Date | null
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -1177,6 +1215,7 @@ export interface UserFieldRefs {
   readonly companyId: Prisma.FieldRef<"User", 'String'>
   readonly employeeId: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
+  readonly deletedAt: Prisma.FieldRef<"User", 'DateTime'>
 }
     
 

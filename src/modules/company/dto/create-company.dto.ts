@@ -25,8 +25,8 @@ export class CreateCompanyDto {
     @IsNotEmpty()
     email: string;
 
-    @IsOptional()
-    @IsString()
-    totalEmployee: string;
+    // @IsOptional()
+    // @IsString()
+    // totalEmployee: string;
 
 }

@@ -750,10 +750,10 @@ export const CompanyScalarFieldEnum = {
   address: 'address',
   phone: 'phone',
   email: 'email',
-  totalEmployee: 'totalEmployee',
   subScribeStatus: 'subScribeStatus',
   status: 'status',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt'
 } as const
 
 export type CompanyScalarFieldEnum = (typeof CompanyScalarFieldEnum)[keyof typeof CompanyScalarFieldEnum]
@@ -770,7 +770,8 @@ export const EmployeeScalarFieldEnum = {
   phone: 'phone',
   address: 'address',
   status: 'status',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt'
 } as const
 
 export type EmployeeScalarFieldEnum = (typeof EmployeeScalarFieldEnum)[keyof typeof EmployeeScalarFieldEnum]
@@ -802,7 +803,8 @@ export const UserScalarFieldEnum = {
   status: 'status',
   companyId: 'companyId',
   employeeId: 'employeeId',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]

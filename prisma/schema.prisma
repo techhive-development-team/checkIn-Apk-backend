@@ -9,34 +9,36 @@ datasource db {
 }
 
 model Company {
-  companyId       String   @id @default(uuid())
+  companyId       String    @id @default(uuid())
   name            String
   logo            String?
   companyType     String?
   address         String?
   phone           String?
-  email           String  @unique
   totalEmployee   String?
-  subScribeStatus String   @default("Inactive")
-  status          String   @default("active")
-  createdAt       DateTime @default(now())
+  email           String    @unique
+  subScribeStatus String    @default("Inactive")
+  status          String    @default("active")
+  createdAt       DateTime  @default(now())
+  deletedAt       DateTime?
 
   employees Employee[]
   users     User[]
 }
 
 model Employee {
-  employeeId String   @id @default(uuid())
+  employeeId String    @id @default(uuid())
   companyId  String
   profilePic String?
   firstName  String
   lastName   String
   position   String?
-  email      String   @unique
+  email      String    @unique
   phone      String?
   address    String?
-  status     String   @default("active")
-  createdAt  DateTime @default(now())
+  status     String    @default("active")
+  createdAt  DateTime  @default(now())
+  deletedAt  DateTime?
 
   attendance Attendance[]
   company    Company      @relation(fields: [companyId], references: [companyId])
@@ -75,6 +77,7 @@ model User {
   companyId  String?  @unique
   employeeId String?  @unique
   createdAt  DateTime @default(now())
+  deletedAt  DateTime?
 
   company  Company?  @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
   employee Employee? @relation(fields: [employeeId], references: [employeeId], onDelete: Cascade)
