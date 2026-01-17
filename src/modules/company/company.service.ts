@@ -11,10 +11,14 @@ import { Role } from 'prisma/generated/enums';
 import * as argon2 from 'argon2';
 import { randomBytes } from 'crypto';
 import { saveBase64Image } from 'src/common/store/image.upload';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class CompanyService {
-  constructor(private readonly prisma: PrismaService, private readonly userService: UserService) { }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly userService: UserService,
+    private readonly mailService: MailService) { }
 
   async create(createCompanyDto: CreateCompanyDto) {
     const existed = await this.findByEmail(createCompanyDto.email);
@@ -36,7 +40,17 @@ export class CompanyService {
 
     const password = await argon2.hash(rawPassword);
 
-    return this.prisma.$transaction(async (tx) => {
+    console.log(rawPassword);
+
+    // await this.mailService.sendAccountCreateMail(
+    //   createCompanyDto.email,
+    //   createCompanyDto.name,
+    //   createCompanyDto.email,
+    //   rawPassword,
+    //   createCompanyDto.name
+    // );
+
+    this.prisma.$transaction(async (tx) => {
       const company = await tx.company.create({
         data: createCompanyDto,
       });
@@ -100,6 +114,8 @@ export class CompanyService {
     ]);
 
     return {
+      statusCode: 200,
+      message: 'Companies retrieved successfully',
       data,
       meta: {
         total,

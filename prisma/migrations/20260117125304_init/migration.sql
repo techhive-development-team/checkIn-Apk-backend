@@ -9,11 +9,12 @@ CREATE TABLE "Company" (
     "companyType" TEXT,
     "address" TEXT,
     "phone" TEXT,
-    "email" TEXT NOT NULL,
     "totalEmployee" TEXT,
+    "email" TEXT NOT NULL,
     "subScribeStatus" TEXT NOT NULL DEFAULT 'Inactive',
     "status" TEXT NOT NULL DEFAULT 'active',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "deletedAt" TIMESTAMP(3),
 
     CONSTRAINT "Company_pkey" PRIMARY KEY ("companyId")
 );
@@ -31,6 +32,7 @@ CREATE TABLE "Employee" (
     "address" TEXT,
     "status" TEXT NOT NULL DEFAULT 'active',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "deletedAt" TIMESTAMP(3),
 
     CONSTRAINT "Employee_pkey" PRIMARY KEY ("employeeId")
 );
@@ -63,6 +65,7 @@ CREATE TABLE "User" (
     "companyId" TEXT,
     "employeeId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "deletedAt" TIMESTAMP(3),
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("userId")
 );

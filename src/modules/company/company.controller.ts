@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Req, UnauthorizedException } from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
@@ -11,29 +11,64 @@ export class CompanyController {
 
   @Post()
   create(@Body() createCompanyDto: CreateCompanyDto) {
-    return this.companyService.create(createCompanyDto);
+    const company = this.companyService.create(createCompanyDto);
+    return {
+      statusCode: 200,
+      message: 'Company created successfully',
+      data: company,
+    };
   }
 
   @UseGuards(JwtAuthGuard)
   @Get()
   findAll(@Query() filterDto: CompanyFilterDto, @Req() req) {
-    // console.log(req);
-    // return req.user;
+    if (req.user.role !== 'ADMIN') {
+      throw new UnauthorizedException('Only admins can access this resource');
+    }
     return this.companyService.findAll(filterDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.companyService.findOne(id);
+  findOne(@Param('id') id: string, @Req() req) {
+    if (req.user.role == 'ADMIN' || req.user.companyId == id) {
+      const company = this.companyService.findOne(id);
+      return {
+        statusCode: 200,
+        message: 'Company retrieved successfully',
+        data: company,
+      }
+    }
+    throw new UnauthorizedException('You can only access your own company data');
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCompanyDto: UpdateCompanyDto) {
-    return this.companyService.update(id, updateCompanyDto);
+  update(@Param('id') id: string, @Body() updateCompanyDto: UpdateCompanyDto, @Req() req) {
+    if (req.user.role !== 'ADMIN') {
+      throw new UnauthorizedException('Only admins can access this resource');
+    } else if (req.user.companyId !== id) {
+      throw new UnauthorizedException('You can only access your own company data');
+    }
+    const updatedCompany = this.companyService.update(id, updateCompanyDto);
+    return {
+      statusCode: 200,
+      message: 'Company updated successfully',
+      data: updatedCompany,
+    };
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.companyService.remove(id);
+  remove(@Param('id') id: string, @Req() req) {
+    if (req.user.role !== 'ADMIN') {
+      throw new UnauthorizedException('Only admins can access this resource');
+    }
+    const company = this.companyService.remove(id);
+    return {
+      statusCode: 200,
+      message: 'Company deleted successfully',
+      data: company,
+    };
   }
 }

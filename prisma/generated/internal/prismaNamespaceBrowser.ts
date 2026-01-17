@@ -80,6 +80,7 @@ export const CompanyScalarFieldEnum = {
   companyType: 'companyType',
   address: 'address',
   phone: 'phone',
+  totalEmployee: 'totalEmployee',
   email: 'email',
   subScribeStatus: 'subScribeStatus',
   status: 'status',

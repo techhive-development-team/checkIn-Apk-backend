@@ -8,10 +8,38 @@ import { saveBase64Image } from 'src/common/store/image.upload';
 import { randomBytes } from 'crypto';
 import * as argon2 from 'argon2';
 import { Role } from 'prisma/generated/enums';
+import { EmployeeFilterDto } from './dto/filter-employee.dto';
 
 @Injectable()
 export class EmployeeService {
-  constructor(private readonly prisma: PrismaService, private readonly companyService: CompanyService, private readonly userService: UserService) { }
+  constructor(
+    private readonly prisma: PrismaService, 
+    private readonly companyService: CompanyService, 
+    private readonly userService: UserService) { }
+
+  async findAll(filterEmployeeDto: EmployeeFilterDto) {
+    const { limit = 10, offset = 0 } = filterEmployeeDto;
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.employee.findMany({
+        take: limit,
+        skip: offset,
+        include: { company: true },
+        where: { deletedAt: null },
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.employee.count({ where: { deletedAt: null } }),
+    ]);
+    return {
+      data,
+      meta: {
+        total,
+        limit,
+        offset,
+        page: Math.floor(offset / limit) + 1,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
 
   async createByCompanyId(companyId: string, createEmployeeDto: CreateEmployeeDto) {
     await this.companyService.findOne(companyId);

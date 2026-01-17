@@ -31,6 +31,7 @@ export type CompanyMinAggregateOutputType = {
   companyType: string | null
   address: string | null
   phone: string | null
+  totalEmployee: string | null
   email: string | null
   subScribeStatus: string | null
   status: string | null
@@ -45,6 +46,7 @@ export type CompanyMaxAggregateOutputType = {
   companyType: string | null
   address: string | null
   phone: string | null
+  totalEmployee: string | null
   email: string | null
   subScribeStatus: string | null
   status: string | null
@@ -59,6 +61,7 @@ export type CompanyCountAggregateOutputType = {
   companyType: number
   address: number
   phone: number
+  totalEmployee: number
   email: number
   subScribeStatus: number
   status: number
@@ -75,6 +78,7 @@ export type CompanyMinAggregateInputType = {
   companyType?: true
   address?: true
   phone?: true
+  totalEmployee?: true
   email?: true
   subScribeStatus?: true
   status?: true
@@ -89,6 +93,7 @@ export type CompanyMaxAggregateInputType = {
   companyType?: true
   address?: true
   phone?: true
+  totalEmployee?: true
   email?: true
   subScribeStatus?: true
   status?: true
@@ -103,6 +108,7 @@ export type CompanyCountAggregateInputType = {
   companyType?: true
   address?: true
   phone?: true
+  totalEmployee?: true
   email?: true
   subScribeStatus?: true
   status?: true
@@ -190,6 +196,7 @@ export type CompanyGroupByOutputType = {
   companyType: string | null
   address: string | null
   phone: string | null
+  totalEmployee: string | null
   email: string
   subScribeStatus: string
   status: string
@@ -225,6 +232,7 @@ export type CompanyWhereInput = {
   companyType?: Prisma.StringNullableFilter<"Company"> | string | null
   address?: Prisma.StringNullableFilter<"Company"> | string | null
   phone?: Prisma.StringNullableFilter<"Company"> | string | null
+  totalEmployee?: Prisma.StringNullableFilter<"Company"> | string | null
   email?: Prisma.StringFilter<"Company"> | string
   subScribeStatus?: Prisma.StringFilter<"Company"> | string
   status?: Prisma.StringFilter<"Company"> | string
@@ -241,6 +249,7 @@ export type CompanyOrderByWithRelationInput = {
   companyType?: Prisma.SortOrderInput | Prisma.SortOrder
   address?: Prisma.SortOrderInput | Prisma.SortOrder
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
+  totalEmployee?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrder
   subScribeStatus?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -261,6 +270,7 @@ export type CompanyWhereUniqueInput = Prisma.AtLeast<{
   companyType?: Prisma.StringNullableFilter<"Company"> | string | null
   address?: Prisma.StringNullableFilter<"Company"> | string | null
   phone?: Prisma.StringNullableFilter<"Company"> | string | null
+  totalEmployee?: Prisma.StringNullableFilter<"Company"> | string | null
   subScribeStatus?: Prisma.StringFilter<"Company"> | string
   status?: Prisma.StringFilter<"Company"> | string
   createdAt?: Prisma.DateTimeFilter<"Company"> | Date | string
@@ -276,6 +286,7 @@ export type CompanyOrderByWithAggregationInput = {
   companyType?: Prisma.SortOrderInput | Prisma.SortOrder
   address?: Prisma.SortOrderInput | Prisma.SortOrder
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
+  totalEmployee?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrder
   subScribeStatus?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -296,6 +307,7 @@ export type CompanyScalarWhereWithAggregatesInput = {
   companyType?: Prisma.StringNullableWithAggregatesFilter<"Company"> | string | null
   address?: Prisma.StringNullableWithAggregatesFilter<"Company"> | string | null
   phone?: Prisma.StringNullableWithAggregatesFilter<"Company"> | string | null
+  totalEmployee?: Prisma.StringNullableWithAggregatesFilter<"Company"> | string | null
   email?: Prisma.StringWithAggregatesFilter<"Company"> | string
   subScribeStatus?: Prisma.StringWithAggregatesFilter<"Company"> | string
   status?: Prisma.StringWithAggregatesFilter<"Company"> | string
@@ -310,6 +322,7 @@ export type CompanyCreateInput = {
   companyType?: string | null
   address?: string | null
   phone?: string | null
+  totalEmployee?: string | null
   email: string
   subScribeStatus?: string
   status?: string
@@ -326,6 +339,7 @@ export type CompanyUncheckedCreateInput = {
   companyType?: string | null
   address?: string | null
   phone?: string | null
+  totalEmployee?: string | null
   email: string
   subScribeStatus?: string
   status?: string
@@ -342,6 +356,7 @@ export type CompanyUpdateInput = {
   companyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalEmployee?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   subScribeStatus?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -358,6 +373,7 @@ export type CompanyUncheckedUpdateInput = {
   companyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalEmployee?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   subScribeStatus?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -374,6 +390,7 @@ export type CompanyCreateManyInput = {
   companyType?: string | null
   address?: string | null
   phone?: string | null
+  totalEmployee?: string | null
   email: string
   subScribeStatus?: string
   status?: string
@@ -388,6 +405,7 @@ export type CompanyUpdateManyMutationInput = {
   companyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalEmployee?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   subScribeStatus?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -402,6 +420,7 @@ export type CompanyUncheckedUpdateManyInput = {
   companyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalEmployee?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   subScribeStatus?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -416,6 +435,7 @@ export type CompanyCountOrderByAggregateInput = {
   companyType?: Prisma.SortOrder
   address?: Prisma.SortOrder
   phone?: Prisma.SortOrder
+  totalEmployee?: Prisma.SortOrder
   email?: Prisma.SortOrder
   subScribeStatus?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -430,6 +450,7 @@ export type CompanyMaxOrderByAggregateInput = {
   companyType?: Prisma.SortOrder
   address?: Prisma.SortOrder
   phone?: Prisma.SortOrder
+  totalEmployee?: Prisma.SortOrder
   email?: Prisma.SortOrder
   subScribeStatus?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -444,6 +465,7 @@ export type CompanyMinOrderByAggregateInput = {
   companyType?: Prisma.SortOrder
   address?: Prisma.SortOrder
   phone?: Prisma.SortOrder
+  totalEmployee?: Prisma.SortOrder
   email?: Prisma.SortOrder
   subScribeStatus?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -514,6 +536,7 @@ export type CompanyCreateWithoutEmployeesInput = {
   companyType?: string | null
   address?: string | null
   phone?: string | null
+  totalEmployee?: string | null
   email: string
   subScribeStatus?: string
   status?: string
@@ -529,6 +552,7 @@ export type CompanyUncheckedCreateWithoutEmployeesInput = {
   companyType?: string | null
   address?: string | null
   phone?: string | null
+  totalEmployee?: string | null
   email: string
   subScribeStatus?: string
   status?: string
@@ -560,6 +584,7 @@ export type CompanyUpdateWithoutEmployeesInput = {
   companyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalEmployee?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   subScribeStatus?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -575,6 +600,7 @@ export type CompanyUncheckedUpdateWithoutEmployeesInput = {
   companyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalEmployee?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   subScribeStatus?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -590,6 +616,7 @@ export type CompanyCreateWithoutUsersInput = {
   companyType?: string | null
   address?: string | null
   phone?: string | null
+  totalEmployee?: string | null
   email: string
   subScribeStatus?: string
   status?: string
@@ -605,6 +632,7 @@ export type CompanyUncheckedCreateWithoutUsersInput = {
   companyType?: string | null
   address?: string | null
   phone?: string | null
+  totalEmployee?: string | null
   email: string
   subScribeStatus?: string
   status?: string
@@ -636,6 +664,7 @@ export type CompanyUpdateWithoutUsersInput = {
   companyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalEmployee?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   subScribeStatus?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -651,6 +680,7 @@ export type CompanyUncheckedUpdateWithoutUsersInput = {
   companyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalEmployee?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   subScribeStatus?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -706,6 +736,7 @@ export type CompanySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   companyType?: boolean
   address?: boolean
   phone?: boolean
+  totalEmployee?: boolean
   email?: boolean
   subScribeStatus?: boolean
   status?: boolean
@@ -723,6 +754,7 @@ export type CompanySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   companyType?: boolean
   address?: boolean
   phone?: boolean
+  totalEmployee?: boolean
   email?: boolean
   subScribeStatus?: boolean
   status?: boolean
@@ -737,6 +769,7 @@ export type CompanySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   companyType?: boolean
   address?: boolean
   phone?: boolean
+  totalEmployee?: boolean
   email?: boolean
   subScribeStatus?: boolean
   status?: boolean
@@ -751,6 +784,7 @@ export type CompanySelectScalar = {
   companyType?: boolean
   address?: boolean
   phone?: boolean
+  totalEmployee?: boolean
   email?: boolean
   subScribeStatus?: boolean
   status?: boolean
@@ -758,7 +792,7 @@ export type CompanySelectScalar = {
   deletedAt?: boolean
 }
 
-export type CompanyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"companyId" | "name" | "logo" | "companyType" | "address" | "phone" | "email" | "subScribeStatus" | "status" | "createdAt" | "deletedAt", ExtArgs["result"]["company"]>
+export type CompanyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"companyId" | "name" | "logo" | "companyType" | "address" | "phone" | "totalEmployee" | "email" | "subScribeStatus" | "status" | "createdAt" | "deletedAt", ExtArgs["result"]["company"]>
 export type CompanyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   employees?: boolean | Prisma.Company$employeesArgs<ExtArgs>
   users?: boolean | Prisma.Company$usersArgs<ExtArgs>
@@ -780,6 +814,7 @@ export type $CompanyPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     companyType: string | null
     address: string | null
     phone: string | null
+    totalEmployee: string | null
     email: string
     subScribeStatus: string
     status: string
@@ -1216,6 +1251,7 @@ export interface CompanyFieldRefs {
   readonly companyType: Prisma.FieldRef<"Company", 'String'>
   readonly address: Prisma.FieldRef<"Company", 'String'>
   readonly phone: Prisma.FieldRef<"Company", 'String'>
+  readonly totalEmployee: Prisma.FieldRef<"Company", 'String'>
   readonly email: Prisma.FieldRef<"Company", 'String'>
   readonly subScribeStatus: Prisma.FieldRef<"Company", 'String'>
   readonly status: Prisma.FieldRef<"Company", 'String'>

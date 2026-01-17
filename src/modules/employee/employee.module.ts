@@ -4,9 +4,16 @@ import { EmployeeService } from './employee.service';
 import { PrismaService } from 'src/prisma.service';
 import { CompanyService } from '../company/company.service';
 import { UserService } from '../user/user.service';
+import { MailService } from '../mail/mail.service';
 
 @Module({
   controllers: [EmployeeController],
-  providers: [EmployeeService, PrismaService, CompanyService, UserService],
+  providers: [
+    EmployeeService,
+    PrismaService,
+    CompanyService,
+    UserService,
+    MailService
+  ],
 })
 export class EmployeeModule { }

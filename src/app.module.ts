@@ -11,10 +11,11 @@ import { EmployeeModule } from './modules/employee/employee.module';
 import { CompanyModule } from './modules/company/company.module';
 import { PrismaService } from './prisma.service';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { MailModule } from './modules/mail/mail.module';
 
 @Module({
   imports: [
-    
+
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -28,6 +29,8 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
       dest: './uploads/images',
     }),
 
+    MailModule,
+    
     UserModule,
     AuthModule,
     EmployeeModule,

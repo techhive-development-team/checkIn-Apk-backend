@@ -9,9 +9,11 @@ import { UserService } from '../user/user.service';
 import { CompanyService } from '../company/company.service';
 import { JwtStrategy } from 'src/common/jwt/jwt.strategy';
 import { JwtModule, JwtService } from '@nestjs/jwt';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
+    MailModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     PrismaModule,
     JwtModule.registerAsync({
