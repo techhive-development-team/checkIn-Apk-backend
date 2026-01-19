@@ -1,14 +1,27 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Query, UnauthorizedException } from '@nestjs/common';
 import { AttendanceService } from './attendance.service';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { UpdateAttendanceDto } from './dto/update-attendance.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('attendance')
 export class AttendanceController {
-  constructor(private readonly attendanceService: AttendanceService) {}
+  constructor(private readonly attendanceService: AttendanceService) { }
 
-  @Post()
-  create(@Body() createAttendanceDto: CreateAttendanceDto) {
+  @UseGuards(JwtAuthGuard)
+  @Post(':employeeId')
+  create(
+    @Param('employeeId') employeeId: string,
+    @Query('companyId') companyId: string,
+    @Body() createAttendanceDto: CreateAttendanceDto,
+    @Req() req
+  ) {
+    if (req.user.role == 'USER' && req.user.employeeId !== employeeId) {
+      throw new UnauthorizedException('You are not authorized to create attendance for this employee');
+    }
+    if(req.user.role == 'CLIENT' && req.user.companyId !== companyId){
+      throw new UnauthorizedException('You are not authorized to create attendance for this company');
+    }
     return this.attendanceService.create(createAttendanceDto);
   }
 

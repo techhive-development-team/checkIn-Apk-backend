@@ -15,7 +15,7 @@ export class CompanyController {
       throw new UnauthorizedException('Only admins can access this resource');
     }
     return this.companyService.findAll(filterDto);
-    }
+  }
 
   @UseGuards(JwtAuthGuard)
   @Get(':id')

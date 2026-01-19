@@ -110,6 +110,7 @@ export class EmployeeService {
       this.prisma.employee.findMany({
         take: limit,
         skip: offset,
+        include: { company: true },
         where: { deletedAt: null, companyId: companyId },
         orderBy: { createdAt: 'desc' },
       }),

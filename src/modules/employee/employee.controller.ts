@@ -3,20 +3,19 @@ import { EmployeeService } from './employee.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { EmployeeFilterDto } from './dto/filter-employee.dto';
 
 @Controller('employee')
 export class EmployeeController {
   constructor(private readonly employeeService: EmployeeService) { }
 
-  @UseGuards(JwtAuthGuard)
-  @Get()
-  findAll(@Query() filterEmployeeDto: EmployeeFilterDto, @Req() req) {
-    if (req.user.role !== 'ADMIN') {
-      throw new UnauthorizedException('Only admins can access this resource');
-    }
-    return this.employeeService.findAll(filterEmployeeDto);
-  }
+  // @UseGuards(JwtAuthGuard)
+  // @Get()
+  // findAll(@Query() filterEmployeeDto: EmployeeFilterDto, @Req() req) {
+  //   if (req.user.role !== 'ADMIN') {
+  //     throw new UnauthorizedException('Only admins can access this resource');
+  //   }
+  //   return this.employeeService.findAll(filterEmployeeDto);
+  // }
 
   @UseGuards(JwtAuthGuard)
   @Post(':companyId')
@@ -31,17 +30,27 @@ export class EmployeeController {
     return this.employeeService.createByCompanyId(companyId, createEmployeeDto);
   }
 
-  @Get(':companyId')
+  @UseGuards(JwtAuthGuard)
+  @Get()
   findByCompanyId(
-    @Param('companyId') companyId: string,
+    @Query('companyId') companyId: string,
     @Query('limit', new ParseIntPipe({ optional: true })) limit = 10,
     @Query('offset', new ParseIntPipe({ optional: true })) offset = 0,
     @Req() req
   ) {
+    console.log(req.user);
     if (req.user.role == 'CLIENT' && req.user.companyId !== companyId) {
-      throw new UnauthorizedException('Unuthorized');
+      throw new UnauthorizedException('Unauthorized');
     }
-    return this.employeeService.findByCompanyId({ companyId, limit, offset });
+    if (req.user.role == 'USER') {
+      throw new UnauthorizedException('Unauthorized');
+    }
+    if (req.user.role == 'CLIENT') {
+      return this.employeeService.findByCompanyId({ companyId, limit, offset });
+    }
+    if (req.user.role == 'ADMIN') {
+      return this.employeeService.findAll({ limit, offset });
+    }
   }
 
   @Get(':companyId/:employeeId')
