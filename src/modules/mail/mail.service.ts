@@ -23,6 +23,10 @@ export class MailService {
                 password,
                 companyName
             },
+        }).then(() => {
+            console.log('Account creation email sent successfully');
+        }).catch((error) => {
+            console.error('Error sending account creation email:', error);
         });
     }
 }

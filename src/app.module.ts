@@ -11,7 +11,9 @@ import { EmployeeModule } from './modules/employee/employee.module';
 import { CompanyModule } from './modules/company/company.module';
 import { PrismaService } from './prisma.service';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
-import { MailModule } from './modules/mail/mail.module';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+
 
 @Module({
   imports: [
@@ -29,8 +31,23 @@ import { MailModule } from './modules/mail/mail.module';
       dest: './uploads/images',
     }),
 
-    MailModule,
-    
+    MailerModule.forRootAsync({
+      useFactory: () => ({
+        transport: 'smtps://office@newvision-institute.com:dttb ieyk wdrp glcl@smtp.gmail.com',
+        defaults: {
+          from: '"No Reply From" <modules@nestjs.com>',
+        },
+        template: {
+          dir: __dirname + '/templates',
+          adapter: new HandlebarsAdapter(),
+          options: {
+            strict: true,
+          },
+        },
+      }),
+    }),
+
+
     UserModule,
     AuthModule,
     EmployeeModule,
