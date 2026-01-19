@@ -9,13 +9,16 @@ import { randomBytes } from 'crypto';
 import * as argon2 from 'argon2';
 import { Role } from 'prisma/generated/enums';
 import { EmployeeFilterDto } from './dto/filter-employee.dto';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class EmployeeService {
   constructor(
-    private readonly prisma: PrismaService, 
-    private readonly companyService: CompanyService, 
-    private readonly userService: UserService) { }
+    private readonly prisma: PrismaService,
+    private readonly companyService: CompanyService,
+    private readonly userService: UserService,
+    private readonly mailService: MailService
+  ) { }
 
   async findAll(filterEmployeeDto: EmployeeFilterDto) {
     const { limit = 10, offset = 0 } = filterEmployeeDto;
@@ -42,7 +45,7 @@ export class EmployeeService {
   }
 
   async createByCompanyId(companyId: string, createEmployeeDto: CreateEmployeeDto) {
-    await this.companyService.findOne(companyId);
+    const company = await this.companyService.findOne(companyId);
     const existed = await this.findByEmail(createEmployeeDto.email);
     const existedUser = await this.userService.findByEmail(createEmployeeDto.email);
     if (existed || existedUser) {
@@ -60,6 +63,15 @@ export class EmployeeService {
       .replace(/[+/=]/g, 'A')
       .slice(0, 8);
     const password = await argon2.hash(rawPassword);
+
+    await this.mailService.sendAccountCreateMail(
+      createEmployeeDto.email,
+      `${createEmployeeDto.firstName} ${createEmployeeDto.lastName}`,
+      createEmployeeDto.email,
+      rawPassword,
+      company.name
+    );
+    
     return this.prisma.$transaction(async (tx) => {
       const employee = await tx.employee.create({
         data: {

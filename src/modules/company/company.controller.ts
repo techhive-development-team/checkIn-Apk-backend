@@ -1,6 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Req, UnauthorizedException } from '@nestjs/common';
+import { Controller, Get, Body, Patch, Param, Delete, Query, UseGuards, Req, UnauthorizedException } from '@nestjs/common';
 import { CompanyService } from './company.service';
-import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { CompanyFilterDto } from './dto/filter-company.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -9,16 +8,6 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 export class CompanyController {
   constructor(private readonly companyService: CompanyService) { }
 
-  @Post()
-  create(@Body() createCompanyDto: CreateCompanyDto) {
-    const company = this.companyService.create(createCompanyDto);
-    return {
-      statusCode: 200,
-      message: 'Company created successfully',
-      data: company,
-    };
-  }
-
   @UseGuards(JwtAuthGuard)
   @Get()
   findAll(@Query() filterDto: CompanyFilterDto, @Req() req) {
@@ -26,7 +15,7 @@ export class CompanyController {
       throw new UnauthorizedException('Only admins can access this resource');
     }
     return this.companyService.findAll(filterDto);
-  }
+    }
 
   @UseGuards(JwtAuthGuard)
   @Get(':id')
