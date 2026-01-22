@@ -57,6 +57,7 @@ model Attendance {
   status           String    @default("present")
   employeeId       String
   createdAt        DateTime  @default(now())
+  deletedAt        DateTime?
 
   employee Employee @relation(fields: [employeeId], references: [employeeId])
 }
@@ -68,15 +69,15 @@ enum Role {
 }
 
 model User {
-  userId     String   @id @default(uuid())
-  email      String   @unique
+  userId     String    @id @default(uuid())
+  email      String    @unique
   password   String?
-  googleId   String?  @unique
-  role       Role     @default(USER)
-  status     String   @default("active")
-  companyId  String?  @unique
-  employeeId String?  @unique
-  createdAt  DateTime @default(now())
+  googleId   String?   @unique
+  role       Role      @default(USER)
+  status     String    @default("active")
+  companyId  String?   @unique
+  employeeId String?   @unique
+  createdAt  DateTime  @default(now())
   deletedAt  DateTime?
 
   company  Company?  @relation(fields: [companyId], references: [companyId], onDelete: Cascade)

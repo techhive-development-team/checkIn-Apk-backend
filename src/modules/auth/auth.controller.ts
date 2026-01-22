@@ -4,6 +4,8 @@ import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { LoginDto } from './dto/login.dto';
 import { CreateCompanyDto } from '../company/dto/create-company.dto';
 import { CompanyService } from '../company/company.service';
+import { ResetPasswordDto } from './dto/reset.dto';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -38,5 +40,11 @@ export class AuthController {
       message: 'Company created successfully',
       data: company,
     };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('reset-password')
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto, @Req() req) {
+    return this.authService.resetPassword(resetPasswordDto,req.user);
   }
 }

@@ -6,6 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import { LoginDto } from './dto/login.dto';
 import * as argon2 from 'argon2';
+import { ResetPasswordDto } from './dto/reset.dto';
 
 @Injectable()
 export class AuthService {
@@ -98,6 +99,29 @@ export class AuthService {
       statusCode: 200,
       message: 'Google login successful',
       token,
+    };
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto, user: any) {
+    const userData = await this.userService.findByEmail(user.email);
+    if (!userData) {
+      throw new UnauthorizedException('Invalid email');
+    }
+    if (!userData.password) {
+      throw new UnauthorizedException('This account uses Google login');
+    }
+    const isPasswordValid = await argon2.verify(
+      userData.password,
+      resetPasswordDto.currentPassword,
+    );
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid password');
+    }
+    const hashedNewPassword = await argon2.hash(resetPasswordDto.newPassword);
+    await this.userService.updatePassword(userData.userId, hashedNewPassword);
+    return {
+      statusCode: 200,
+      message: 'Password reset successful',
     };
   }
 

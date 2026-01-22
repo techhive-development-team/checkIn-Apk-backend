@@ -8,15 +8,6 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 export class EmployeeController {
   constructor(private readonly employeeService: EmployeeService) { }
 
-  // @UseGuards(JwtAuthGuard)
-  // @Get()
-  // findAll(@Query() filterEmployeeDto: EmployeeFilterDto, @Req() req) {
-  //   if (req.user.role !== 'ADMIN') {
-  //     throw new UnauthorizedException('Only admins can access this resource');
-  //   }
-  //   return this.employeeService.findAll(filterEmployeeDto);
-  // }
-
   @UseGuards(JwtAuthGuard)
   @Post(':companyId')
   createByCompany(
@@ -38,7 +29,6 @@ export class EmployeeController {
     @Query('offset', new ParseIntPipe({ optional: true })) offset = 0,
     @Req() req
   ) {
-    console.log(req.user);
     if (req.user.role == 'CLIENT' && req.user.companyId !== companyId) {
       throw new UnauthorizedException('Unauthorized');
     }
@@ -62,6 +52,9 @@ export class EmployeeController {
     if (req.user.role == 'CLIENT' && req.user.companyId !== companyId) {
       throw new UnauthorizedException('Unuthorized');
     }
+    if (req.user.role == 'USER' && req.user.employeeId !== employeeId) {
+      throw new UnauthorizedException('Unuthorized');
+    }
     return this.employeeService.findOneByCompanyIdAndEmployeeId(companyId, employeeId);
   }
 
@@ -72,10 +65,7 @@ export class EmployeeController {
     @Body() updateEmployeeDto: UpdateEmployeeDto,
     @Req() req
   ) {
-    if (req.user.role !== 'ADMIN') {
-      throw new UnauthorizedException('Only admins can access this resource');
-    }
-    else if (req.user.role == 'CLIENT' && req.user.companyId !== companyId) {
+    if (req.user.role == 'CLIENT' && req.user.companyId !== companyId) {
       throw new UnauthorizedException('Unuthorized');
     }
     return this.employeeService.update(companyId, employeeId, updateEmployeeDto);
@@ -87,10 +77,7 @@ export class EmployeeController {
     @Param('employeeId') employeeId: string,
     @Req() req
   ) {
-    if (req.user.role !== 'ADMIN') {
-      throw new UnauthorizedException('Only admins can access this resource');
-    }
-    else if (req.user.role == 'CLIENT' && req.user.companyId !== companyId) {
+    if (req.user.role == 'CLIENT' && req.user.companyId !== companyId) {
       throw new UnauthorizedException('Unuthorized');
     }
     return this.employeeService.remove(companyId, employeeId);

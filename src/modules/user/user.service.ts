@@ -29,7 +29,12 @@ export class UserService {
   }
 
   findAll() {
-    return this.prisma.user.findMany();
+    return this.prisma.user.findMany({
+      include: {
+        company: true,
+        employee: true,
+      }
+    });
   }
 
   findByEmail(email: string, googleId?: string) {
@@ -58,11 +63,11 @@ export class UserService {
     return user;
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return `This action returns a #${id} user`;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
+  update(id: string, updateUserDto: UpdateUserDto) {
     return `This action updates a #${id} user`;
   }
 
@@ -92,5 +97,16 @@ export class UserService {
         deletedAt: new Date()
       }
     })
+  }
+
+  async updatePassword(userId: string, hashedPassword: string) {
+    return this.prisma.user.update({
+      where: {
+        userId: userId,
+      },
+      data: {
+        password: hashedPassword,
+      },
+    });
   }
 }
