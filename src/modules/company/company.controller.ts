@@ -1,4 +1,15 @@
-import { Controller, Get, Body, Patch, Param, Delete, Query, UseGuards, Req, UnauthorizedException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  UseGuards,
+  Req,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { CompanyFilterDto } from './dto/filter-company.dto';
@@ -6,7 +17,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('company')
 export class CompanyController {
-  constructor(private readonly companyService: CompanyService) { }
+  constructor(private readonly companyService: CompanyService) {}
 
   @UseGuards(JwtAuthGuard)
   @Get()
@@ -19,25 +30,34 @@ export class CompanyController {
 
   @UseGuards(JwtAuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: string, @Req() req) {
+  async findOne(@Param('id') id: string, @Req() req) {
     if (req.user.role == 'ADMIN' || req.user.companyId == id) {
-      const company = this.companyService.findOne(id);
+      const company = await this.companyService.findOne(id);
       return {
         statusCode: 200,
         message: 'Company retrieved successfully',
         data: company,
-      }
+      };
     }
-    throw new UnauthorizedException('You can only access your own company data');
+    throw new UnauthorizedException(
+      'You can only access your own company data',
+    );
   }
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCompanyDto: UpdateCompanyDto, @Req() req) {
+  update(
+    @Param('id') id: string,
+    @Body() updateCompanyDto: UpdateCompanyDto,
+    @Req() req,
+  ) {
     if (req.user.role !== 'ADMIN') {
       throw new UnauthorizedException('Only admins can access this resource');
-    } else if (req.user.companyId !== id) {
-      throw new UnauthorizedException('You can only access your own company data');
+    }
+    else if (req.user.role === 'CLIENT' && req.user.companyId !== id) {
+      throw new UnauthorizedException(
+        'You can only access your own company data',
+      );
     }
     const updatedCompany = this.companyService.update(id, updateCompanyDto);
     return {
