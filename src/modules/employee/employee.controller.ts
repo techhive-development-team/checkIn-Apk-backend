@@ -50,10 +50,10 @@ export class EmployeeController {
     @Req() req
   ) {
     if (req.user.role == 'CLIENT' && req.user.companyId !== companyId) {
-      throw new UnauthorizedException('Unuthorized');
+      throw new UnauthorizedException('Unauthorized');
     }
     if (req.user.role == 'USER' && req.user.employeeId !== employeeId) {
-      throw new UnauthorizedException('Unuthorized');
+      throw new UnauthorizedException('Unauthorized');
     }
     return this.employeeService.findOneByCompanyIdAndEmployeeId(companyId, employeeId);
   }
@@ -66,7 +66,7 @@ export class EmployeeController {
     @Req() req
   ) {
     if (req.user.role == 'CLIENT' && req.user.companyId !== companyId) {
-      throw new UnauthorizedException('Unuthorized');
+      throw new UnauthorizedException('Unauthorized');
     }
     return this.employeeService.update(companyId, employeeId, updateEmployeeDto);
   }

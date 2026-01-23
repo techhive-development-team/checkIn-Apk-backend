@@ -1,7 +1,6 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateCompanyDto } from './create-company.dto';
 import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { Transform } from 'class-transformer';
 
 export class UpdateCompanyDto extends PartialType(CreateCompanyDto) {
 
