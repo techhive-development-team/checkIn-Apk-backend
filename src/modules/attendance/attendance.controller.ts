@@ -16,7 +16,7 @@ export class AttendanceController {
     if (req.user.role !== 'USER') {
       throw new Error('Only users can create attendance records');
     }
-    return this.attendanceService.create(req.user.id, createAttendanceDto);
+    return this.attendanceService.create(req.user.employeeId, createAttendanceDto);
   }
 
   @UseGuards(JwtAuthGuard)
