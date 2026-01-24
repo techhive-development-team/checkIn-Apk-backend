@@ -3,6 +3,7 @@ import { AttendanceService } from './attendance.service';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { UpdateAttendanceDto } from './dto/update-attendance.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ApiResponse } from 'src/common/exceptions/api-response';
 import * as ExcelJS from 'exceljs';
 import type { Response } from 'express';
 
@@ -12,17 +13,19 @@ export class AttendanceController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createAttendanceDto: CreateAttendanceDto, @Req() req) {
+  async create(@Body() createAttendanceDto: CreateAttendanceDto, @Req() req) {
     if (req.user.role !== 'USER') {
-      throw new Error('Only users can create attendance records');
+      return ApiResponse.unauthorized('Only users can create attendance records');
     }
-    return this.attendanceService.create(req.user.employeeId, createAttendanceDto);
+    const attendance = await this.attendanceService.create(req.user.employeeId, createAttendanceDto);
+    return ApiResponse.success(attendance, 'Attendance created successfully', 201);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  findAll(@Req() req) {
-    return this.attendanceService.findAll(req.user);
+  async findAll(@Req() req) {
+    const attendances = await this.attendanceService.findAll(req.user);
+    return ApiResponse.success(attendances, 'Attendance records retrieved successfully');
   }
 
   @UseGuards(JwtAuthGuard)
@@ -69,29 +72,32 @@ export class AttendanceController {
 
   @UseGuards(JwtAuthGuard)
   @Patch(':attendanceId')
-  update(
+  async update(
     @Param('attendanceId') attendanceId: string,
     @Body() updateAttendanceDto: UpdateAttendanceDto,
     @Req() req
   ) {
     if (req.user.role !== 'ADMIN') {
-      throw new Error('Only admins can update attendance records');
+      return ApiResponse.unauthorized('Only admins can update attendance records');
     }
-    return this.attendanceService.update(attendanceId, updateAttendanceDto);
+    const attendance = await this.attendanceService.update(attendanceId, updateAttendanceDto);
+    return ApiResponse.success(attendance, 'Attendance updated successfully');
   }
 
   @UseGuards(JwtAuthGuard)
   @Get(':attendanceId')
-  findOne(
+  async findOne(
     @Param('attendanceId') attendanceId: string,
     @Req() req) {
-    return this.attendanceService.findOne(attendanceId, req.user);
+    const attendance = await this.attendanceService.findOne(attendanceId, req.user);
+    return ApiResponse.success(attendance, 'Attendance retrieved successfully');
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':attendanceId')
-  remove(@Param('attendanceId') attendanceId: string, @Req() req) {
-    return this.attendanceService.remove(attendanceId, req.user);
+  async remove(@Param('attendanceId') attendanceId: string, @Req() req) {
+    const attendance = await this.attendanceService.remove(attendanceId, req.user);
+    return ApiResponse.success(attendance, 'Attendance deleted successfully');
   }
 
 }

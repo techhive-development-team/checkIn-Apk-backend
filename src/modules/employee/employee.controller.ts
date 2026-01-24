@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe, Req, UseGuards } from '@nestjs/common';
 import { EmployeeService } from './employee.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ApiResponse } from 'src/common/exceptions/api-response';
 
 @Controller('employee')
 export class EmployeeController {
@@ -10,77 +11,92 @@ export class EmployeeController {
 
   @UseGuards(JwtAuthGuard)
   @Post(':companyId')
-  createByCompany(
+  async createByCompany(
     @Param('companyId') companyId: string,
     @Body() createEmployeeDto: CreateEmployeeDto,
     @Req() req
   ) {
-    if (req.user.role == 'CLIENT' && req.user.companyId !== companyId) {
-      throw new UnauthorizedException('Unuthorized');
+    if (req.user.role === 'ADMIN' || req.user.role === 'USER') {
+      return ApiResponse.unauthorized('Unuthorized');
     }
-    return this.employeeService.createByCompanyId(companyId, createEmployeeDto);
+    if (req.user.role == 'CLIENT' && req.user.companyId !== companyId) {
+      return ApiResponse.unauthorized('Unuthorized');
+    }
+    const employee = await this.employeeService.createByCompanyId(companyId, createEmployeeDto);
+    return ApiResponse.success(employee, 'Employee created successfully', 201);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  findByCompanyId(
+  async findByCompanyId(
     @Query('companyId') companyId: string,
     @Query('limit', new ParseIntPipe({ optional: true })) limit = 10,
     @Query('offset', new ParseIntPipe({ optional: true })) offset = 0,
     @Req() req
   ) {
     if (req.user.role == 'CLIENT' && req.user.companyId !== companyId) {
-      throw new UnauthorizedException('Unauthorized');
+      return ApiResponse.unauthorized('Unauthorized');
     }
     if (req.user.role == 'USER') {
-      throw new UnauthorizedException('Unauthorized');
+      return ApiResponse.unauthorized('Unauthorized');
     }
+    let employees;
     if (req.user.role == 'CLIENT') {
-      return this.employeeService.findByCompanyId({ companyId, limit, offset });
+      employees = await this.employeeService.findByCompanyId({ companyId, limit, offset });
     }
     if (req.user.role == 'ADMIN') {
-      return this.employeeService.findAll({ limit, offset });
+      employees = await this.employeeService.findAll({ limit, offset });
     }
+    return ApiResponse.success(employees, 'Employees retrieved successfully');
   }
-
+  
+  @UseGuards(JwtAuthGuard)
   @Get(':companyId/:employeeId')
-  findOneByCompanyId(
+  async findOneByCompanyId(
     @Param('companyId') companyId: string,
     @Param('employeeId') employeeId: string,
     @Req() req
   ) {
     if (req.user.role == 'CLIENT' && req.user.companyId !== companyId) {
-      throw new UnauthorizedException('Unauthorized');
+      return ApiResponse.unauthorized('Unauthorized');
     }
     if (req.user.role == 'USER' && req.user.employeeId !== employeeId) {
-      throw new UnauthorizedException('Unauthorized');
+      return ApiResponse.unauthorized('Unauthorized');
     }
-    return this.employeeService.findOneByCompanyIdAndEmployeeId(companyId, employeeId);
+    const employee = await this.employeeService.findOneByCompanyIdAndEmployeeId(companyId, employeeId);
+    return ApiResponse.success(employee, 'Employee retrieved successfully');
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':companyId/:employeeId')
-  updateByCompanyId(
+  async updateByCompanyId(
     @Param('companyId') companyId: string,
     @Param('employeeId') employeeId: string,
     @Body() updateEmployeeDto: UpdateEmployeeDto,
     @Req() req
   ) {
     if (req.user.role == 'CLIENT' && req.user.companyId !== companyId) {
-      throw new UnauthorizedException('Unauthorized');
+      return ApiResponse.unauthorized('Unauthorized');
     }
-    return this.employeeService.update(companyId, employeeId, updateEmployeeDto);
+    if (req.user.role == 'USER' && req.user.employeeId !== employeeId) {
+      return ApiResponse.unauthorized('Unauthorized');
+    }
+    const employee = await this.employeeService.update(companyId, employeeId, updateEmployeeDto);
+    return ApiResponse.success(employee, 'Employee updated successfully');
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':companyId/:employeeId')
-  removeByCompanyId(
+  async removeByCompanyId(
     @Param('companyId') companyId: string,
     @Param('employeeId') employeeId: string,
     @Req() req
   ) {
     if (req.user.role == 'CLIENT' && req.user.companyId !== companyId) {
-      throw new UnauthorizedException('Unuthorized');
+      return ApiResponse.unauthorized('Unuthorized');
     }
-    return this.employeeService.remove(companyId, employeeId);
+    const employee = await this.employeeService.remove(companyId, employeeId);
+    return ApiResponse.success(employee, 'Employee deleted successfully');
   }
 
 }

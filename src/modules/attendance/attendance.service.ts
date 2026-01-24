@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { UpdateAttendanceDto } from './dto/update-attendance.dto';
 import { PrismaService } from 'src/prisma.service';
+import { CustomNotFoundException } from 'src/common/exceptions/custom.exceptions';
 import { saveBase64Image } from 'src/common/store/image.upload';
 
 @Injectable()
@@ -38,7 +39,7 @@ export class AttendanceService {
       include: { employee: { include: { company: true } } },
     });
     if (!attendance) {
-      throw new NotFoundException(`Attendance record ID ${attendanceId} not found.`);
+      throw new CustomNotFoundException(`Attendance record ID ${attendanceId} not found.`);
     }
     return attendance;
   }

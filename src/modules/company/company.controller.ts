@@ -8,76 +8,58 @@ import {
   Query,
   UseGuards,
   Req,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { CompanyFilterDto } from './dto/filter-company.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ApiResponse } from 'src/common/exceptions/api-response';
 
 @Controller('company')
 export class CompanyController {
-  constructor(private readonly companyService: CompanyService) {}
+  constructor(private readonly companyService: CompanyService) { }
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  findAll(@Query() filterDto: CompanyFilterDto, @Req() req) {
+  async findAll(@Query() filterDto: CompanyFilterDto, @Req() req) {
     if (req.user.role !== 'ADMIN') {
-      throw new UnauthorizedException('Only admins can access this resource');
+      return ApiResponse.unauthorized('Only admins can access this resource');
     }
-    return this.companyService.findAll(filterDto);
+    const companies = await this.companyService.findAll(filterDto);
+    return ApiResponse.success(companies, 'Companies retrieved successfully');
   }
 
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   async findOne(@Param('id') id: string, @Req() req) {
-    if (req.user.role == 'ADMIN' || req.user.companyId == id) {
+    if (req.user.role == 'ADMIN' || (req.user.role == 'CLIENT' && req.user.companyId == id)) {
       const company = await this.companyService.findOne(id);
-      return {
-        statusCode: 200,
-        message: 'Company retrieved successfully',
-        data: company,
-      };
+      return ApiResponse.success(company, 'Company retrieved successfully');
     }
-    throw new UnauthorizedException(
-      'You can only access your own company data',
-    );
+    return ApiResponse.unauthorized('You can only access your own company data');
   }
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateCompanyDto: UpdateCompanyDto,
     @Req() req,
   ) {
-    if (req.user.role !== 'ADMIN') {
-      throw new UnauthorizedException('Only admins can access this resource');
+    if (req.user.role == 'ADMIN' || (req.user.role == 'CLIENT' && req.user.companyId == id)) {
+      const company = await this.companyService.update(id, updateCompanyDto);
+      return ApiResponse.success(company, 'Company updated successfully');
     }
-    else if (req.user.role === 'CLIENT' && req.user.companyId !== id) {
-      throw new UnauthorizedException(
-        'You can only access your own company data',
-      );
-    }
-    const updatedCompany = this.companyService.update(id, updateCompanyDto);
-    return {
-      statusCode: 200,
-      message: 'Company updated successfully',
-      data: updatedCompany,
-    };
+    return ApiResponse.unauthorized('You can only access your own company data');
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string, @Req() req) {
+  async remove(@Param('id') id: string, @Req() req) {
     if (req.user.role !== 'ADMIN') {
-      throw new UnauthorizedException('Only admins can access this resource');
+      return ApiResponse.unauthorized('Only admins can access this resource');
     }
-    const company = this.companyService.remove(id);
-    return {
-      statusCode: 200,
-      message: 'Company deleted successfully',
-      data: company,
-    };
+    const company = await this.companyService.remove(id);
+    return ApiResponse.success(company, 'Company deleted successfully');
   }
 }

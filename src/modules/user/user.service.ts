@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma.service';
+import { CustomNotFoundException } from 'src/common/exceptions/custom.exceptions';
 import { Prisma } from 'prisma/generated/client';
 
 @Injectable()
@@ -48,7 +49,7 @@ export class UserService {
       where: { companyId: id },
     });
     if (!user) {
-      throw new NotFoundException(`User with this ID ${id} not found`);
+      throw new CustomNotFoundException(`User with this ID ${id} not found`);
     }
     return user;
   }
@@ -58,7 +59,7 @@ export class UserService {
       where: { employeeId: id },
     });
     if (!user) {
-      throw new NotFoundException(`User with this ID ${id} not found`);
+      throw new CustomNotFoundException(`User with this ID ${id} not found`);
     }
     return user;
   }

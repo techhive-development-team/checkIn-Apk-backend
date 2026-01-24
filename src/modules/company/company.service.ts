@@ -1,9 +1,8 @@
 import {
   Injectable,
-  NotFoundException,
-  ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
+import { CustomConflictException, CustomNotFoundException } from 'src/common/exceptions/custom.exceptions';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { UserService } from '../user/user.service';
@@ -24,7 +23,7 @@ export class CompanyService {
     const existed = await this.findByEmail(createCompanyDto.email);
     const existedInUser = await this.userService.findByEmail(createCompanyDto.email);
     if (existed || existedInUser) {
-      throw new ConflictException(
+      throw new CustomConflictException(
         `Company with email ${createCompanyDto.email} already exists`,
       );
     }
@@ -70,7 +69,7 @@ export class CompanyService {
     const existed = await this.findByEmail(createCompanyDto.email);
     const existedInUser = await this.userService.findByEmail(createCompanyDto.email);
     if (existed || existedInUser) {
-      throw new ConflictException(
+      throw new CustomConflictException(
         `Company with email ${createCompanyDto.email} already exists`,
       );
     }
@@ -112,8 +111,6 @@ export class CompanyService {
     ]);
 
     return {
-      statusCode: 200,
-      message: 'Companies retrieved successfully',
       data,
       meta: {
         total,
@@ -136,7 +133,7 @@ export class CompanyService {
       where: { companyId: id },
     });
     if (!company) {
-      throw new NotFoundException(`Company with ID ${id} not found`);
+      throw new CustomNotFoundException(`Company with ID ${id} not found`);
     }
     return company;
   }
@@ -147,7 +144,7 @@ export class CompanyService {
       const existed = await this.findByEmail(updateCompanyDto.email);
       const existedInUser = await this.userService.findByEmail(updateCompanyDto.email);
       if (existed || existedInUser) {
-        throw new ConflictException(
+        throw new CustomConflictException(
           `Company with email ${updateCompanyDto.email} already exists`,
         );
       }

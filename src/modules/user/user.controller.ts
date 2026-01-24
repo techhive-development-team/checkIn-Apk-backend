@@ -8,7 +8,6 @@ import {
   Delete,
   UseGuards,
   Req,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -24,7 +23,7 @@ export class UserController {
   @Post()
   create(@Body() createUserDto: CreateUserDto, @Req() req) {
     if (req.user.role !== 'ADMIN') {
-      throw new UnauthorizedException('Unauthorized access');
+      return ApiResponse.unauthorized('Unauthorized access');
     }
     const user = this.userService.create(createUserDto);
     return ApiResponse.success(user, 'User created successfully', 201);
@@ -32,42 +31,46 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  findAll(@Req() req) {
+  async findAll(@Req() req) {
     if (req.user.role !== 'ADMIN') {
-      throw new UnauthorizedException('Unauthorized access');
+      return ApiResponse.unauthorized('Unauthorized access');
     }
-    return this.userService.findAll();
+    const users = await this.userService.findAll();
+    return ApiResponse.success(users, 'Users retrieved successfully');
   }
 
   @UseGuards(JwtAuthGuard)
   @Get(':userId')
-  findOne(@Param('userId') userId: string, @Req() req) {
+  async findOne(@Param('userId') userId: string, @Req() req) {
     if (req.user.role !== 'ADMIN') {
-      throw new UnauthorizedException('Unauthorized access');
+      return ApiResponse.unauthorized('Unauthorized access');
     }
-    return this.userService.findOne(userId);
+    const user = await this.userService.findOne(userId);
+    return ApiResponse.success(user, 'User retrieved successfully');
   }
 
   @UseGuards(JwtAuthGuard)
   @Patch(':userId')
-  update(
+  async update(
     @Param('userId') userId: string,
     @Body() updateUserDto: UpdateUserDto,
     @Req() req) {
     if (req.user.role !== 'ADMIN') {
-      throw new UnauthorizedException('Unauthorized access');
+      return ApiResponse.unauthorized('Unauthorized access');
     }
-    return this.userService.update(userId, updateUserDto);
+    const user = await this.userService.update(userId, updateUserDto);
+    return ApiResponse.success(user, 'User updated successfully');
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':userId')
-  remove(
+  async remove(
     @Param('userId') userId: string,
     @Req() req) {
     if (req.user.role !== 'ADMIN') {
-      throw new UnauthorizedException('Unauthorized access');
+      return ApiResponse.unauthorized('Unauthorized access');
     }
-    return this.userService.remove(userId);
+    const user = await this.userService.remove(userId);
+    return ApiResponse.success(user, 'User deleted successfully');
   }
 }

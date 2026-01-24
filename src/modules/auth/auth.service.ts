@@ -1,5 +1,6 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CompanyService } from '../company/company.service';
+import { CustomUnauthorizedException } from 'src/common/exceptions/custom.exceptions';
 import axios from 'axios';
 import { CreateCompanyDto } from '../company/dto/create-company.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -18,7 +19,7 @@ export class AuthService {
 
   async googleLogin(data: any) {
     if (!data?.accessToken) {
-      throw new UnauthorizedException('Missing Google access token');
+      throw new CustomUnauthorizedException('Missing Google access token');
     }
 
     const googleUser = await this.verifyGoogleToken(data.accessToken);
@@ -48,12 +49,7 @@ export class AuthService {
       isNewUser = true;
     }
 
-    const token = this.jwtService.sign({
-      sub: user.userId,
-      email: user.email,
-      role: user.role,
-      companyId: user.companyId,
-    });
+    const token = this.jwtService.sign({ user });
 
 
     return {
@@ -75,47 +71,43 @@ export class AuthService {
 
       return data;
     } catch (error) {
-      throw new UnauthorizedException('Invalid Google token');
+      throw new CustomUnauthorizedException('Invalid Google token');
     }
   }
 
   async signIn(loginDto: LoginDto) {
     const user = await this.userService.findByEmail(loginDto.email);
     if (!user) {
-      throw new UnauthorizedException('Invalid email');
+      throw new CustomUnauthorizedException('Invalid email');
     }
     if (!user.password) {
-      throw new UnauthorizedException('This account uses Google login');
+      throw new CustomUnauthorizedException('This account uses Google login');
     }
     const isPasswordValid = await argon2.verify(
       user.password,
       loginDto.password,
     );
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid password');
+      throw new CustomUnauthorizedException('Invalid password');
     }
     const token = this.jwtService.sign({ user });
-    return {
-      statusCode: 200,
-      message: 'Google login successful',
-      token,
-    };
+    return token;
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto, user: any) {
     const userData = await this.userService.findByEmail(user.email);
     if (!userData) {
-      throw new UnauthorizedException('Invalid email');
+      throw new CustomUnauthorizedException('Invalid email');
     }
     if (!userData.password) {
-      throw new UnauthorizedException('This account uses Google login');
+      throw new CustomUnauthorizedException('This account uses Google login');
     }
     const isPasswordValid = await argon2.verify(
       userData.password,
       resetPasswordDto.currentPassword,
     );
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid password');
+      throw new CustomUnauthorizedException('Invalid password');
     }
     const hashedNewPassword = await argon2.hash(resetPasswordDto.newPassword);
     await this.userService.updatePassword(userData.userId, hashedNewPassword);

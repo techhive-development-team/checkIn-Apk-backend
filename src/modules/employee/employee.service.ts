@@ -1,7 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { PrismaService } from 'src/prisma.service';
+import { CustomConflictException, CustomNotFoundException } from 'src/common/exceptions/custom.exceptions';
 import { CompanyService } from '../company/company.service';
 import { UserService } from '../user/user.service';
 import { saveBase64Image } from 'src/common/store/image.upload';
@@ -49,8 +50,8 @@ export class EmployeeService {
     const existed = await this.findByEmail(createEmployeeDto.email);
     const existedUser = await this.userService.findByEmail(createEmployeeDto.email);
     if (existed || existedUser) {
-      throw new ConflictException(
-        `Company with email ${createEmployeeDto.email} already exists`,
+      throw new CustomConflictException(
+        `Employee with email ${createEmployeeDto.email} already exists`,
       );
     }
     let imagePath: string | undefined;
@@ -137,7 +138,7 @@ export class EmployeeService {
       }
     })
     if (!employee) {
-      throw new NotFoundException(`Employee with ID ${employeeId} not found`);
+      throw new CustomNotFoundException(`Employee with ID ${employeeId} not found`);
     }
     return employee;
   }
@@ -150,7 +151,7 @@ export class EmployeeService {
     });
 
     if (!employee) {
-      throw new NotFoundException(`Employee with ID ${id} not found`);
+      throw new CustomNotFoundException(`Employee with ID ${id} not found`);
     }
     return employee;
   }
@@ -161,7 +162,7 @@ export class EmployeeService {
       const existed = await this.findByEmail(updateEmployeeDto.email);
       const existedInUser = await this.userService.findByEmail(updateEmployeeDto.email);
       if (existed || existedInUser) {
-        throw new ConflictException(
+        throw new CustomConflictException(
           `Employee with email ${updateEmployeeDto.email} already exists`,
         );
       }
