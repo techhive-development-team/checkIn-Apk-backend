@@ -4,6 +4,7 @@ import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 import * as express from 'express';
 import { join } from 'path';
+import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
   dotenv.config();
@@ -14,6 +15,9 @@ async function bootstrap() {
   if (process.env.NODE_ENV !== 'production') {
     app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
   }
+  app.use(bodyParser.json({ limit: '50mb' }));
+  app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

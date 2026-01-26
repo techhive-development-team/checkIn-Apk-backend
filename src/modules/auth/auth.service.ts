@@ -8,13 +8,15 @@ import { UserService } from '../user/user.service';
 import { LoginDto } from './dto/login.dto';
 import * as argon2 from 'argon2';
 import { ResetPasswordDto } from './dto/reset.dto';
+import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private jwtService: JwtService,
     private companyService: CompanyService,
-    private userService: UserService
+    private userService: UserService,
+    private prisma: PrismaService
   ) { }
 
   async googleLogin(data: any) {
@@ -31,6 +33,18 @@ export class AuthService {
       family_name: lastName,
       picture,
     } = googleUser;
+
+    // Check if email exists with different auth method
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser && existingUser.googleId !== googleId) {
+      if (existingUser.password) {
+        throw new CustomUnauthorizedException('This email is registered with password login. Please use password login or reset your password.');
+      }
+      throw new CustomUnauthorizedException('This email is already registered with a different account.');
+    }
 
     let user = await this.userService.findByEmail(email, googleId);
     let isNewUser = false;
@@ -49,8 +63,12 @@ export class AuthService {
       isNewUser = true;
     }
 
-    const token = this.jwtService.sign({ user });
+    // Check if user has admin or client role only
+    if (user.role !== 'ADMIN' && user.role !== 'CLIENT') {
+      throw new CustomUnauthorizedException('Only Admin and Client users can access this portal.');
+    }
 
+    const token = this.jwtService.sign({ user });
 
     return {
       message: isNewUser ? 'Google registration successful' : 'Google login successful',
@@ -81,8 +99,14 @@ export class AuthService {
       throw new CustomUnauthorizedException('Invalid email');
     }
     if (!user.password) {
-      throw new CustomUnauthorizedException('This account uses Google login');
+      throw new CustomUnauthorizedException('This account uses Google login. Please login with Google.');
     }
+
+    // Check if user has admin or client role only
+    if (user.role !== 'ADMIN' && user.role !== 'CLIENT') {
+      throw new CustomUnauthorizedException('Only Admin and Client users can access this portal.');
+    }
+
     const isPasswordValid = await argon2.verify(
       user.password,
       loginDto.password,
@@ -112,7 +136,7 @@ export class AuthService {
     const hashedNewPassword = await argon2.hash(resetPasswordDto.newPassword);
     await this.userService.updatePassword(userData.userId, hashedNewPassword);
     return {
-      statusCode: 200,
+      statusCode: 201,
       message: 'Password reset successful',
     };
   }

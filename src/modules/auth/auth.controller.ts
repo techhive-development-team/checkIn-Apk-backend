@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseGuards, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, UseGuards, ValidationPipe } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { LoginDto } from './dto/login.dto';
@@ -7,6 +7,7 @@ import { CompanyService } from '../company/company.service';
 import { ResetPasswordDto } from './dto/reset.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { ApiResponse } from 'src/common/exceptions/api-response';
+import type { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -22,14 +23,21 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
-  async googleAuthRedirect(@Req() req) {
-    const result = await this.authService.googleLogin(req.user);
-    return ApiResponse.success(result, result.message);
+  async googleAuthRedirect(@Req() req, @Res() res: Response) {
+    try {
+      const result = await this.authService.googleLogin(req.user);
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173/login';
+      return res.redirect(`${frontendUrl}?token=${result.token}`);
+    } catch (error: any) {
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173/login';
+      const errorMessage = error?.message || 'Authentication failed';
+      return res.redirect(`${frontendUrl}/login?error=${encodeURIComponent(errorMessage)}`);
+    }
   }
 
   @Post('login')
   async signIn(
-    @Body(new ValidationPipe()) loginDto: LoginDto,
+    @Body(new ValidationPipe()) loginDto: LoginDto
   ): Promise<ApiResponse> {
     const token = await this.authService.signIn(loginDto);
     return ApiResponse.success({ token });
