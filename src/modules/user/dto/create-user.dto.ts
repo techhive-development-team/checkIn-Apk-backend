@@ -14,6 +14,14 @@ enum UserStatus {
 
 export class CreateUserDto {
 
+  @IsString()
+  @IsOptional()
+  public name?: string;
+
+  @IsString()
+  @IsOptional()
+  public logo?: string;
+
   @IsNotEmpty()
   @IsString()
   public email: string;

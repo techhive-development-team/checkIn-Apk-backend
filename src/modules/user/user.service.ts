@@ -4,6 +4,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma.service';
 import { CustomNotFoundException } from 'src/common/exceptions/custom.exceptions';
 import { Prisma } from 'prisma/generated/client';
+import { saveBase64Image } from 'src/common/store/image.upload';
 
 @Injectable()
 export class UserService {
@@ -29,13 +30,28 @@ export class UserService {
     });
   }
 
-  findAll() {
-    return this.prisma.user.findMany({
-      include: {
-        company: true,
-        employee: true,
+  async findAll(filters?: { limit?: number; offset?: number }) {
+    const { limit = 10, offset = 0 } = filters || {};
+
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.user.findMany({
+        take: limit,
+        skip: offset,
+        where: { deletedAt: null },
+        orderBy: { createdAt: 'desc' }
+      }),
+      this.prisma.user.count({ where: { deletedAt: null } })
+    ])
+    return {
+      data,
+      meta: {
+        total,
+        limit,
+        offset,
+        page: Math.floor(offset / limit) + 1,
+        totalPages: Math.ceil(total / limit),
       }
-    });
+    }
   }
 
   findByEmail(email: string, googleId?: string) {
@@ -64,12 +80,31 @@ export class UserService {
     return user;
   }
 
-  findOne(id: string) {
-    return `This action returns a #${id} user`;
+  async findOne(id: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { userId: id }
+    })
+    if (!user) {
+      throw new CustomNotFoundException(`User with ID ${id} not found`)
+    }
+    return user;
   }
 
-  update(id: string, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    const user = await this.findOne(id);
+    let logoPath: string | undefined;
+    if (updateUserDto.logo) {
+      logoPath = saveBase64Image(updateUserDto.logo)
+      updateUserDto.logo = logoPath;
+    }
+    return this.prisma.user.update({
+      data: {
+        name: updateUserDto.name,
+        email: updateUserDto.email,
+        logo: updateUserDto.logo
+      },
+      where: { userId: id }
+    })
   }
 
   async remove(id: string) {

@@ -70,6 +70,8 @@ enum Role {
 
 model User {
   userId     String    @id @default(uuid())
+  name       String?
+  logo       String?
   email      String    @unique
   password   String?
   googleId   String?   @unique
