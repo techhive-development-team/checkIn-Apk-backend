@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma.service';
-import { CustomNotFoundException } from 'src/common/exceptions/custom.exceptions';
-import { Prisma } from 'prisma/generated/client';
+import { CustomConflictException, CustomNotFoundException } from 'src/common/exceptions/custom.exceptions';
+import { Prisma, Role } from 'prisma/generated/client';
 import { saveBase64Image } from 'src/common/store/image.upload';
 
 @Injectable()
@@ -28,6 +28,27 @@ export class UserService {
     return this.prisma.user.create({
       data
     });
+  }
+
+  async createAdmin(createUserDto: CreateUserDto) {
+    const exist = await this.findByEmail(createUserDto.email);
+    if(exist){
+      throw new CustomConflictException(`Company with email ${createUserDto.email} already exists`,)
+    }
+    let logoPath: string | undefined;
+    if (createUserDto.logo) {
+      logoPath = saveBase64Image(createUserDto.logo)
+      createUserDto.logo = logoPath;
+    }
+    const user =await this.prisma.user.create({
+      data: {
+        name: createUserDto.name,
+        email: createUserDto.email,
+        logo: createUserDto.logo,
+        role: Role.ADMIN
+      }
+    })
+    return user
   }
 
   async findAll(filters?: { limit?: number; offset?: number }) {

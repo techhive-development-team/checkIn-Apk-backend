@@ -21,11 +21,11 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createUserDto: CreateUserDto, @Req() req) {
+  async create(@Body() createUserDto: CreateUserDto, @Req() req) {
     if (req.user.role !== 'ADMIN') {
       return ApiResponse.unauthorized('Unauthorized access');
     }
-    const user = this.userService.create(createUserDto);
+    const user = await this.userService.createAdmin(createUserDto);
     return ApiResponse.success(user, 'User created successfully', 201);
   }
 
