@@ -107,6 +107,12 @@ export class AuthService {
       throw new CustomUnauthorizedException('Only Admin and Client users can access this portal.');
     }
 
+    if (user.role === 'CLIENT' && user.companyId) {
+      const company = await this.companyService.findOne(user.companyId);
+      user.name = company.name;
+      user.logo = company.logo;
+    }
+
     const isPasswordValid = await argon2.verify(
       user.password,
       loginDto.password,
