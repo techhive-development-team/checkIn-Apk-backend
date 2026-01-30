@@ -42,11 +42,11 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @Get(':userId')
   async findOne(@Param('userId') userId: string, @Req() req) {
-    if (req.user.role !== 'ADMIN') {
-      return ApiResponse.unauthorized('Unauthorized access');
+    if (req.user.role == 'ADMIN' || (req.user.role == 'CLIENT' && req.user.userId == userId)) {
+      const user = await this.userService.findOne(userId);
+      return ApiResponse.success(user, 'User retrieved successfully');
     }
-    const user = await this.userService.findOne(userId);
-    return ApiResponse.success(user, 'User retrieved successfully');
+    return ApiResponse.unauthorized('You can only access your own data');
   }
 
   @UseGuards(JwtAuthGuard)
