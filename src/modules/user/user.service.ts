@@ -5,10 +5,16 @@ import { PrismaService } from 'src/prisma.service';
 import { CustomConflictException, CustomNotFoundException } from 'src/common/exceptions/custom.exceptions';
 import { Prisma, Role } from 'prisma/generated/client';
 import { saveBase64Image } from 'src/common/store/image.upload';
+import * as argon2 from 'argon2';
+import { randomBytes } from 'crypto';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) { }
+  constructor(
+    private prisma: PrismaService,
+    private readonly mailService: MailService
+  ) { }
 
   create(createUserDto: CreateUserDto) {
     const data: Prisma.UserCreateInput = {
@@ -32,7 +38,7 @@ export class UserService {
 
   async createAdmin(createUserDto: CreateUserDto) {
     const exist = await this.findByEmail(createUserDto.email);
-    if(exist){
+    if (exist) {
       throw new CustomConflictException(`Company with email ${createUserDto.email} already exists`,)
     }
     let logoPath: string | undefined;
@@ -40,29 +46,75 @@ export class UserService {
       logoPath = saveBase64Image(createUserDto.logo)
       createUserDto.logo = logoPath;
     }
-    const user =await this.prisma.user.create({
+    const rawPassword = randomBytes(6)
+      .toString('base64')
+      .replace(/[+/=]/g, 'A')
+      .slice(0, 8);
+
+    const password = await argon2.hash(rawPassword);
+    const user = await this.prisma.user.create({
       data: {
         name: createUserDto.name,
+        password: password,
         email: createUserDto.email,
         logo: createUserDto.logo,
         role: Role.ADMIN
       }
     })
+
+    if (createUserDto.name) {
+      await this.mailService.sendAccountCreateMail(
+        createUserDto.email,
+        createUserDto.name,
+        createUserDto.email,
+        rawPassword,
+        "CIA ADMIN"
+      );
+    }
     return user
   }
 
   async findAll(filters?: { limit?: number; offset?: number }) {
     const { limit = 10, offset = 0 } = filters || {};
 
-    const [data, total] = await this.prisma.$transaction([
+    const [users, total] = await this.prisma.$transaction([
       this.prisma.user.findMany({
         take: limit,
-        skip: offset,
-        where: { deletedAt: null },
-        orderBy: { createdAt: 'desc' }
+        skip: offset, where: {
+          deletedAt: null,
+          OR: [
+            { role: 'ADMIN' },
+            { role: 'CLIENT' },
+          ],
+        },
+        orderBy: { createdAt: 'desc' },
+        include: {
+          company: true,
+          employee: true
+        }
       }),
       this.prisma.user.count({ where: { deletedAt: null } })
     ])
+
+    const data = users.map((user) => {
+      let name: string | null = null;
+      let logo: string | null = null;
+
+      if (user.role === 'ADMIN') {
+        name = user.name;
+        logo = user.logo;
+      }
+      if (user.role === 'CLIENT') {
+        name = user.company?.name || null;
+        logo = user.company?.logo || null;
+      }
+      return {
+        ...user,
+        name: name,
+        logo: logo,
+      };
+    });
+
     return {
       data,
       meta: {
@@ -103,10 +155,19 @@ export class UserService {
 
   async findOne(id: string) {
     const user = await this.prisma.user.findUnique({
-      where: { userId: id }
+      where: { userId: id },
+      include: { company: true }
     })
     if (!user) {
       throw new CustomNotFoundException(`User with ID ${id} not found`)
+    }
+    let name: string | null = null;
+    let logo: string | null = null;
+    if (user.role === 'CLIENT') {
+      name = user.company?.name || null;
+      logo = user.company?.logo || null;
+      user.name = name;
+      user.logo = logo;
     }
     return user;
   }
