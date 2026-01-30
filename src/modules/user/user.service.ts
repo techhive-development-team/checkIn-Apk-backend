@@ -183,14 +183,22 @@ export class UserService {
       data: {
         name: updateUserDto.name,
         email: updateUserDto.email,
-        logo: updateUserDto.logo
+        logo: updateUserDto.logo,
+        status: updateUserDto.status
       },
       where: { userId: id }
     })
   }
 
   async remove(id: string) {
-    return "";
+    await this.prisma.user.update({
+      where: {
+        userId: id,
+      },
+      data: {
+        deletedAt: new Date()
+      }
+    })
   }
 
   async removeByCompanyId(id: string) {
