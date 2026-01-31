@@ -37,6 +37,9 @@ export class AttendanceService {
     const attendance = await this.prismaService.attendance.findFirst({
       where: { employeeId, date: today },
     });
+    if (!attendance) {
+      throw new CustomNotFoundException("Not Found");
+    }
     return attendance;
   }
 
