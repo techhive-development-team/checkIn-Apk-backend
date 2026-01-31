@@ -26,8 +26,8 @@ export class AuthController {
   async googleAuthRedirect(@Req() req, @Res() res: Response) {
     try {
       const result = await this.authService.googleLogin(req.user);
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173/login';
-      return res.redirect(`${frontendUrl}?token=${result.token}`);
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      return res.redirect(`${frontendUrl}/google?token=${result.token}`);
     } catch (error: any) {
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173/login';
       const errorMessage = error?.message || 'Authentication failed';

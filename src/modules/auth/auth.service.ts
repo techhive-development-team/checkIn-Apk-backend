@@ -33,8 +33,10 @@ export class AuthService {
       family_name: lastName,
       picture,
     } = googleUser;
+    const base64Logo = picture
+      ? await this.imageUrlToBase64(picture)
+      : "";
 
-    // Check if email exists with different auth method
     const existingUser = await this.prisma.user.findUnique({
       where: { email },
     });
@@ -49,11 +51,11 @@ export class AuthService {
     let user = await this.userService.findByEmail(email, googleId);
     let isNewUser = false;
 
-    if (!user) {
+    if (!user ) {
       const createCompanyDto: CreateCompanyDto = {
         name: `${firstName} ${lastName}`,
         email,
-        logo: picture,
+        logo: base64Logo.toString(),
         companyType: '',
         address: '',
         phone: '',
@@ -146,5 +148,17 @@ export class AuthService {
       message: 'Password reset successful',
     };
   }
+
+  async imageUrlToBase64(imageUrl: string): Promise<string> {
+    const response = await axios.get(imageUrl, {
+      responseType: 'arraybuffer',
+    });
+
+    const buffer = Buffer.from(response.data);
+    const contentType = response.headers['content-type'] || 'image/jpeg';
+
+    return `data:${contentType};base64,${buffer.toString('base64')}`;
+  }
+
 
 }

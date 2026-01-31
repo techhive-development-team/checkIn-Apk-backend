@@ -13,7 +13,7 @@ async function bootstrap() {
   });
 
   if (process.env.NODE_ENV !== 'production') {
-    app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
+    app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
   }
   app.use(bodyParser.json({ limit: '50mb' }));
   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));

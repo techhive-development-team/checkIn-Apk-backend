@@ -32,6 +32,14 @@ export class AttendanceService {
     });
   }
 
+  async getUserTodayAttendanceStatus(employeeId: string) {
+    const today = this.getTodayRange();
+    const attendance = await this.prismaService.attendance.findFirst({
+      where: { employeeId, date: today },
+    });
+    return attendance;
+  }
+
   findOne(attendanceId: string, user: any) {
     const whereClause = this.getWhereClause(user, attendanceId);
     const attendance = this.prismaService.attendance.findUnique({

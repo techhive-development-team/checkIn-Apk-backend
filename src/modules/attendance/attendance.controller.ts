@@ -22,6 +22,13 @@ export class AttendanceController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('/status')
+  async getStatus(@Req() req) {
+    const attendance = await this.attendanceService.getUserTodayAttendanceStatus(req.user.employeeId);
+    return ApiResponse.success(attendance, 'Attendance status retrieved successfully.')
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get()
   async findAll(@Req() req) {
     const attendances = await this.attendanceService.findAll(req.user);
