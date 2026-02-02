@@ -84,7 +84,6 @@ export class UserService {
           deletedAt: null,
           OR: [
             { role: 'ADMIN' },
-            { role: 'CLIENT' },
           ],
         },
         orderBy: { createdAt: 'desc' },

@@ -131,6 +131,13 @@ export class CompanyService {
   async findOne(id: string) {
     const company = await this.prisma.company.findUnique({
       where: { companyId: id },
+      include: {
+        employees: {
+          where: {
+            deletedAt: null
+          }
+        }
+      }
     });
     if (!company) {
       throw new CustomNotFoundException(`Company with ID ${id} not found`);
@@ -180,6 +187,33 @@ export class CompanyService {
         deletedAt: new Date(),
       },
     });
+  }
+
+  async passwordReset(companyId: string) {
+    const company = await this.findOne(companyId);
+    const rawPassword = randomBytes(6)
+      .toString('base64')
+      .replace(/[+/=]/g, 'A')
+      .slice(0, 8);
+
+    const password = await argon2.hash(rawPassword);
+
+    await this.mailService.sendResetPasswordMail(
+      company.email,
+      company.name,
+      company.email,
+      password
+    );
+    const user = await this.prisma.user.update({
+      where: {
+        companyId,
+        role: 'CLIENT'
+      },
+      data: {
+        password
+      }
+    })
+    return user;
   }
 
 }

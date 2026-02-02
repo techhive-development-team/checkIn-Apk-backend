@@ -54,6 +54,11 @@ export class EmployeeService {
         `Employee with email ${createEmployeeDto.email} already exists`,
       );
     }
+    if (company.subScribeStatus == 'Inactive' && company.employees.length > 10) {
+      throw new CustomConflictException(
+        'You have exceeded the 10-employee limit. Please subscribe to add more employees.'
+      );
+    }
     let imagePath: string | undefined;
     if (createEmployeeDto.profilePic) {
       imagePath = saveBase64Image(createEmployeeDto.profilePic)
@@ -72,7 +77,7 @@ export class EmployeeService {
       rawPassword,
       company.name
     );
-    
+
     return this.prisma.$transaction(async (tx) => {
       const employee = await tx.employee.create({
         data: {
@@ -196,5 +201,33 @@ export class EmployeeService {
         employeeId: employeeId,
       },
     });
+  }
+
+  async passwordReset(companyId: string, employeeId: string) {
+    const employee = await this.findOneByCompanyIdAndEmployeeId(companyId, employeeId)
+    const rawPassword = randomBytes(6)
+      .toString('base64')
+      .replace(/[+/=]/g, 'A')
+      .slice(0, 8);
+
+    const password = await argon2.hash(rawPassword);
+
+    await this.mailService.sendResetPasswordMail(
+      employee.email,
+      employee.firstName,
+      employee.email,
+      password
+    );
+
+    const user = await this.prisma.user.update({
+      where: {
+        employeeId,
+        role: 'USER'
+      },
+      data: {
+        password
+      }
+    })
+    return user;
   }
 }

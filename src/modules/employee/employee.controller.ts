@@ -49,7 +49,7 @@ export class EmployeeController {
     }
     return ApiResponse.success(employees, 'Employees retrieved successfully');
   }
-  
+
   @UseGuards(JwtAuthGuard)
   @Get(':companyId/:employeeId')
   async findOneByCompanyId(
@@ -97,6 +97,19 @@ export class EmployeeController {
     }
     const employee = await this.employeeService.remove(companyId, employeeId);
     return ApiResponse.success(employee, 'Employee deleted successfully');
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(':companyId/:employeeId/password-reset')
+  async passwordReset(
+    @Param('companyId') companyId: string,
+    @Param('employeeId') employeeId: string,
+    @Req() req) {
+    if (req.user.role == 'CLIENT' && req.user.companyId !== companyId) {
+      return ApiResponse.unauthorized('Unuthorized');
+    }
+    const user = ''
+    return ApiResponse.success(user, 'Password reset successfully');
   }
 
 }

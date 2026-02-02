@@ -62,4 +62,14 @@ export class CompanyController {
     const company = await this.companyService.remove(id);
     return ApiResponse.success(company, 'Company deleted successfully');
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id/password-reset')
+  async passwordReset(@Param('id') id: string, @Req() req) {
+    if (req.user.role !== 'ADMIN') {
+      return ApiResponse.unauthorized('You can only access your own company data');
+    }
+    const user = await this.companyService.passwordReset(id);
+    return ApiResponse.success(user, 'Password reset successfully');
+  }
 }

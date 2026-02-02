@@ -5,12 +5,16 @@ import * as dotenv from 'dotenv';
 import * as express from 'express';
 import { join } from 'path';
 import * as bodyParser from 'body-parser';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
   dotenv.config();
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     cors: true,
   });
+  
+  app.setBaseViewsDir(join(__dirname, '..', 'src/templates'));
+  app.setViewEngine('hbs');
 
   if (process.env.NODE_ENV !== 'production') {
     app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
