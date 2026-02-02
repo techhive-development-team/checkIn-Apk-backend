@@ -39,13 +39,13 @@ export class CompanyService {
 
     const password = await argon2.hash(rawPassword);
 
-    // await this.mailService.sendAccountCreateMail(
-    //   createCompanyDto.email,
-    //   createCompanyDto.name,
-    //   createCompanyDto.email,
-    //   rawPassword,
-    //   createCompanyDto.name
-    // );
+    await this.mailService.sendAccountCreateMail(
+      createCompanyDto.email,
+      createCompanyDto.name,
+      createCompanyDto.email,
+      rawPassword,
+      createCompanyDto.name
+    );
 
     this.prisma.$transaction(async (tx) => {
       const company = await tx.company.create({
@@ -202,7 +202,7 @@ export class CompanyService {
       company.email,
       company.name,
       company.email,
-      password
+      rawPassword
     );
     const user = await this.prisma.user.update({
       where: {

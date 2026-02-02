@@ -108,7 +108,7 @@ export class EmployeeController {
     if (req.user.role == 'CLIENT' && req.user.companyId !== companyId) {
       return ApiResponse.unauthorized('Unuthorized');
     }
-    const user = ''
+    const user = await this.employeeService.passwordReset(companyId, employeeId);
     return ApiResponse.success(user, 'Password reset successfully');
   }
 

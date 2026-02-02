@@ -216,7 +216,7 @@ export class EmployeeService {
       employee.email,
       employee.firstName,
       employee.email,
-      password
+      rawPassword
     );
 
     const user = await this.prisma.user.update({
