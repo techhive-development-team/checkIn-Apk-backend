@@ -31,7 +31,7 @@ export class AttendanceController {
   @UseGuards(JwtAuthGuard)
   @Get()
   async findAll(@Req() req) {
-    const attendances = await this.attendanceService.findAll(req.user);
+    const attendances = await this.attendanceService.findAll(req.user,);
     return ApiResponse.success(attendances, 'Attendance records retrieved successfully');
   }
 
@@ -52,7 +52,7 @@ export class AttendanceController {
       { header: 'Check Out Location', key: 'checkOutLocation', width: 30 },
     ];
 
-    attendances.forEach((att) => {
+    attendances.data.forEach((att) => {
       worksheet.addRow({
         date: att.date,
         name: att.employee.firstName + ' ' + att.employee.lastName,

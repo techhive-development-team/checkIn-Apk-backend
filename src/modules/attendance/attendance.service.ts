@@ -24,13 +24,38 @@ export class AttendanceService {
     }
   }
 
-  findAll(user: any) {
-    const whereClause = this.getWhereClause(user);
-    return this.prismaService.attendance.findMany({
-      where: whereClause,
-      include: { employee: { include: { company: true } } },
-    });
+  async findAll(filters?: { user?: any; limit?: number; offset?: number }) {
+    const { user, limit = 10, offset = 0 } = filters || {};
+    console.log(user)
+    const whereClause = await this.getWhereClause(user);
+
+    const [data, total] = await this.prismaService.$transaction([
+      this.prismaService.attendance.findMany({
+        where: whereClause,
+        skip: offset,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          employee: { include: { company: true } },
+        }
+      }),
+      this.prismaService.attendance.count({
+        where: whereClause,
+      }),
+    ]);
+
+    return {
+      data,
+      meta: {
+        total,
+        limit,
+        offset,
+        page: Math.floor(offset / limit) + 1,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
+
 
   async getUserTodayAttendanceStatus(employeeId: string) {
     const today = this.getTodayRange();
