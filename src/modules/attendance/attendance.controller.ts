@@ -31,14 +31,14 @@ export class AttendanceController {
   @UseGuards(JwtAuthGuard)
   @Get()
   async findAll(@Req() req) {
-    const attendances = await this.attendanceService.findAll(req.user,);
+    const attendances = await this.attendanceService.findAll({user: req.user},);
     return ApiResponse.success(attendances, 'Attendance records retrieved successfully');
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('/export')
   async export(@Req() req, @Res() res: Response): Promise<void> {
-    const attendances = (await this.attendanceService.findAll(req.user)) ?? [];
+    const attendances = (await this.attendanceService.findAll({user: req.user})) ?? [];
 
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Sheet1');
