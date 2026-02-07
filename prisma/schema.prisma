@@ -84,4 +84,13 @@ model User {
 
   company  Company?  @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
   employee Employee? @relation(fields: [employeeId], references: [employeeId], onDelete: Cascade)
+  forgetPassword ForgetPassword?
+}
+
+model ForgetPassword {
+  userId    String   @id
+  token     String   @unique
+  expiredAt DateTime
+
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
 }
