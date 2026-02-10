@@ -37,3 +37,8 @@ export type Attendance = Prisma.AttendanceModel
  * 
  */
 export type User = Prisma.UserModel
+/**
+ * Model ForgetPassword
+ * 
+ */
+export type ForgetPassword = Prisma.ForgetPasswordModel

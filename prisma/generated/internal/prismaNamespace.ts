@@ -387,7 +387,8 @@ export const ModelName = {
   Company: 'Company',
   Employee: 'Employee',
   Attendance: 'Attendance',
-  User: 'User'
+  User: 'User',
+  ForgetPassword: 'ForgetPassword'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -403,7 +404,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "company" | "employee" | "attendance" | "user"
+    modelProps: "company" | "employee" | "attendance" | "user" | "forgetPassword"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -703,6 +704,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ForgetPassword: {
+      payload: Prisma.$ForgetPasswordPayload<ExtArgs>
+      fields: Prisma.ForgetPasswordFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ForgetPasswordFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ForgetPasswordPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ForgetPasswordFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ForgetPasswordPayload>
+        }
+        findFirst: {
+          args: Prisma.ForgetPasswordFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ForgetPasswordPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ForgetPasswordFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ForgetPasswordPayload>
+        }
+        findMany: {
+          args: Prisma.ForgetPasswordFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ForgetPasswordPayload>[]
+        }
+        create: {
+          args: Prisma.ForgetPasswordCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ForgetPasswordPayload>
+        }
+        createMany: {
+          args: Prisma.ForgetPasswordCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ForgetPasswordCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ForgetPasswordPayload>[]
+        }
+        delete: {
+          args: Prisma.ForgetPasswordDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ForgetPasswordPayload>
+        }
+        update: {
+          args: Prisma.ForgetPasswordUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ForgetPasswordPayload>
+        }
+        deleteMany: {
+          args: Prisma.ForgetPasswordDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ForgetPasswordUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ForgetPasswordUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ForgetPasswordPayload>[]
+        }
+        upsert: {
+          args: Prisma.ForgetPasswordUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ForgetPasswordPayload>
+        }
+        aggregate: {
+          args: Prisma.ForgetPasswordAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateForgetPassword>
+        }
+        groupBy: {
+          args: Prisma.ForgetPasswordGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ForgetPasswordGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ForgetPasswordCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ForgetPasswordCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -789,7 +864,8 @@ export const AttendanceScalarFieldEnum = {
   checkOutLocation: 'checkOutLocation',
   status: 'status',
   employeeId: 'employeeId',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt'
 } as const
 
 export type AttendanceScalarFieldEnum = (typeof AttendanceScalarFieldEnum)[keyof typeof AttendanceScalarFieldEnum]
@@ -797,6 +873,8 @@ export type AttendanceScalarFieldEnum = (typeof AttendanceScalarFieldEnum)[keyof
 
 export const UserScalarFieldEnum = {
   userId: 'userId',
+  name: 'name',
+  logo: 'logo',
   email: 'email',
   password: 'password',
   googleId: 'googleId',
@@ -809,6 +887,15 @@ export const UserScalarFieldEnum = {
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const ForgetPasswordScalarFieldEnum = {
+  userId: 'userId',
+  token: 'token',
+  expiredAt: 'expiredAt'
+} as const
+
+export type ForgetPasswordScalarFieldEnum = (typeof ForgetPasswordScalarFieldEnum)[keyof typeof ForgetPasswordScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -995,6 +1082,7 @@ export type GlobalOmitConfig = {
   employee?: Prisma.EmployeeOmit
   attendance?: Prisma.AttendanceOmit
   user?: Prisma.UserOmit
+  forgetPassword?: Prisma.ForgetPasswordOmit
 }
 
 /* Types for Logging */

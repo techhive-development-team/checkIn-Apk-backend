@@ -50,6 +50,7 @@ CREATE TABLE "Attendance" (
     "status" TEXT NOT NULL DEFAULT 'present',
     "employeeId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "deletedAt" TIMESTAMP(3),
 
     CONSTRAINT "Attendance_pkey" PRIMARY KEY ("id")
 );
@@ -57,6 +58,8 @@ CREATE TABLE "Attendance" (
 -- CreateTable
 CREATE TABLE "User" (
     "userId" TEXT NOT NULL,
+    "name" TEXT,
+    "logo" TEXT,
     "email" TEXT NOT NULL,
     "password" TEXT,
     "googleId" TEXT,
@@ -68,6 +71,15 @@ CREATE TABLE "User" (
     "deletedAt" TIMESTAMP(3),
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("userId")
+);
+
+-- CreateTable
+CREATE TABLE "ForgetPassword" (
+    "userId" TEXT NOT NULL,
+    "token" TEXT NOT NULL,
+    "expiredAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "ForgetPassword_pkey" PRIMARY KEY ("userId")
 );
 
 -- CreateIndex
@@ -88,6 +100,9 @@ CREATE UNIQUE INDEX "User_companyId_key" ON "User"("companyId");
 -- CreateIndex
 CREATE UNIQUE INDEX "User_employeeId_key" ON "User"("employeeId");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "ForgetPassword_token_key" ON "ForgetPassword"("token");
+
 -- AddForeignKey
 ALTER TABLE "Employee" ADD CONSTRAINT "Employee_companyId_fkey" FOREIGN KEY ("companyId") REFERENCES "Company"("companyId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -99,3 +114,6 @@ ALTER TABLE "User" ADD CONSTRAINT "User_companyId_fkey" FOREIGN KEY ("companyId"
 
 -- AddForeignKey
 ALTER TABLE "User" ADD CONSTRAINT "User_employeeId_fkey" FOREIGN KEY ("employeeId") REFERENCES "Employee"("employeeId") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ForgetPassword" ADD CONSTRAINT "ForgetPassword_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("userId") ON DELETE CASCADE ON UPDATE CASCADE;

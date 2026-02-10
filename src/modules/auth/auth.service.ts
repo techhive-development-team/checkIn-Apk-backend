@@ -1,3 +1,4 @@
+import { MailService } from './../mail/mail.service';
 import { Injectable } from '@nestjs/common';
 import { CompanyService } from '../company/company.service';
 import { CustomUnauthorizedException } from 'src/common/exceptions/custom.exceptions';
@@ -9,6 +10,9 @@ import { LoginDto } from './dto/login.dto';
 import * as argon2 from 'argon2';
 import { ResetPasswordDto } from './dto/reset.dto';
 import { PrismaService } from 'src/prisma.service';
+import { randomBytes } from 'crypto';
+import { ForgotPasswordDto } from './dto/forgotPwd.dto';
+import { PasswordResetDto } from './dto/pwdReset.dto';
 
 @Injectable()
 export class AuthService {
@@ -16,8 +20,9 @@ export class AuthService {
     private jwtService: JwtService,
     private companyService: CompanyService,
     private userService: UserService,
-    private prisma: PrismaService
-  ) { }
+    private prisma: PrismaService,
+    private readonly mailService: MailService,
+  ) {}
 
   async googleLogin(data: any) {
     if (!data?.accessToken) {
@@ -33,9 +38,7 @@ export class AuthService {
       family_name: lastName,
       picture,
     } = googleUser;
-    const base64Logo = picture
-      ? await this.imageUrlToBase64(picture)
-      : "";
+    const base64Logo = picture ? await this.imageUrlToBase64(picture) : '';
 
     const existingUser = await this.prisma.user.findUnique({
       where: { email },
@@ -43,15 +46,19 @@ export class AuthService {
 
     if (existingUser && existingUser.googleId !== googleId) {
       if (existingUser.password) {
-        throw new CustomUnauthorizedException('This email is registered with password login. Please use password login or reset your password.');
+        throw new CustomUnauthorizedException(
+          'This email is registered with password login. Please use password login or reset your password.',
+        );
       }
-      throw new CustomUnauthorizedException('This email is already registered with a different account.');
+      throw new CustomUnauthorizedException(
+        'This email is already registered with a different account.',
+      );
     }
 
     let user = await this.userService.findByEmail(email, googleId);
     let isNewUser = false;
 
-    if (!user ) {
+    if (!user) {
       const createCompanyDto: CreateCompanyDto = {
         name: `${firstName} ${lastName}`,
         email,
@@ -61,19 +68,26 @@ export class AuthService {
         phone: '',
       };
 
-      user = await this.companyService.createByGoogle(createCompanyDto, googleId);
+      user = await this.companyService.createByGoogle(
+        createCompanyDto,
+        googleId,
+      );
       isNewUser = true;
     }
 
     // Check if user has admin or client role only
     if (user.role !== 'ADMIN' && user.role !== 'CLIENT') {
-      throw new CustomUnauthorizedException('Only Admin and Client users can access this portal.');
+      throw new CustomUnauthorizedException(
+        'Only Admin and Client users can access this portal.',
+      );
     }
 
     const token = this.jwtService.sign({ user });
 
     return {
-      message: isNewUser ? 'Google registration successful' : 'Google login successful',
+      message: isNewUser
+        ? 'Google registration successful'
+        : 'Google login successful',
       token,
     };
   }
@@ -101,7 +115,9 @@ export class AuthService {
       throw new CustomUnauthorizedException('Invalid email');
     }
     if (!user.password) {
-      throw new CustomUnauthorizedException('This account uses Google login. Please login with Google.');
+      throw new CustomUnauthorizedException(
+        'This account uses Google login. Please login with Google.',
+      );
     }
 
     // Check if user has admin or client role only
@@ -160,5 +176,64 @@ export class AuthService {
     return `data:${contentType};base64,${buffer.toString('base64')}`;
   }
 
+  async forgotPassword(forgotPassworddto: ForgotPasswordDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { email: forgotPassworddto.email },
+      include: { company: true },
+    });
 
+    if (!user) {
+      return { message: 'If this email exists, a reset link has been sent.' };
+    }
+
+    const token = randomBytes(32).toString('hex');
+    const expiredAt = new Date(Date.now() + 15 * 60 * 1000);
+
+    await this.prisma.forgetPassword.upsert({
+      where: { userId: user.userId },
+      update: { token, expiredAt },
+      create: { userId: user.userId, token, expiredAt },
+    });
+
+    const frontendUrl = 'http://localhost:5173';
+    const resetLink = `${frontendUrl}/reset-password?token=${token}`;
+    if (user.company)
+      await this.mailService.sendForgotPasswordEmail(
+        user.email,
+        user.company.name || 'User',
+        resetLink,
+      );
+
+    return { message: 'If this email exists, a reset email has been sent.' };
+  }
+
+  async passwordReset(passwordResetDto: PasswordResetDto) {
+    const record = await this.prisma.forgetPassword.findFirst({
+      where: { token: passwordResetDto.token },
+    });
+
+    if (!record) {
+      throw new Error('Invalid or expired token');
+    }
+
+    if (new Date() > record.expiredAt) {
+      await this.prisma.forgetPassword.delete({
+        where: { userId: record.userId },
+      });
+      throw new Error('Token expired');
+    }
+
+    const hashedPassword = await argon2.hash(passwordResetDto.newPassword);
+
+    await this.prisma.user.update({
+      where: { userId: record.userId },
+      data: { password: hashedPassword },
+    });
+
+    await this.prisma.forgetPassword.delete({
+      where: { userId: record.userId },
+    });
+
+    return { message: 'Password reset successfully' };
+  }
 }

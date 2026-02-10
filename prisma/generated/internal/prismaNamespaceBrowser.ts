@@ -54,7 +54,8 @@ export const ModelName = {
   Company: 'Company',
   Employee: 'Employee',
   Attendance: 'Attendance',
-  User: 'User'
+  User: 'User',
+  ForgetPassword: 'ForgetPassword'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -120,7 +121,8 @@ export const AttendanceScalarFieldEnum = {
   checkOutLocation: 'checkOutLocation',
   status: 'status',
   employeeId: 'employeeId',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt'
 } as const
 
 export type AttendanceScalarFieldEnum = (typeof AttendanceScalarFieldEnum)[keyof typeof AttendanceScalarFieldEnum]
@@ -128,6 +130,8 @@ export type AttendanceScalarFieldEnum = (typeof AttendanceScalarFieldEnum)[keyof
 
 export const UserScalarFieldEnum = {
   userId: 'userId',
+  name: 'name',
+  logo: 'logo',
   email: 'email',
   password: 'password',
   googleId: 'googleId',
@@ -140,6 +144,15 @@ export const UserScalarFieldEnum = {
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const ForgetPasswordScalarFieldEnum = {
+  userId: 'userId',
+  token: 'token',
+  expiredAt: 'expiredAt'
+} as const
+
+export type ForgetPasswordScalarFieldEnum = (typeof ForgetPasswordScalarFieldEnum)[keyof typeof ForgetPasswordScalarFieldEnum]
 
 
 export const SortOrder = {
