@@ -22,7 +22,7 @@ export class AuthService {
     private userService: UserService,
     private prisma: PrismaService,
     private readonly mailService: MailService,
-  ) {}
+  ) { }
 
   async googleLogin(data: any) {
     if (!data?.accessToken) {
@@ -109,6 +109,31 @@ export class AuthService {
     }
   }
 
+  async employeeSignIn(loginDto: LoginDto) {
+    const user = await this.userService.findByEmail(loginDto.email);
+    if (user?.role === 'ADMIN' || user?.role === 'CLIENT') {
+      throw new CustomUnauthorizedException('Only Employee can access this portal.');
+    }
+    if (!user) {
+      throw new CustomUnauthorizedException('Invalid email');
+    }
+    if (!user.password) {
+      throw new CustomUnauthorizedException(
+        'This account uses Google login. Please login with Google.',
+      );
+    }
+
+    const isPasswordValid = await argon2.verify(
+      user.password,
+      loginDto.password,
+    );
+    if (!isPasswordValid) {
+      throw new CustomUnauthorizedException('Invalid password');
+    }
+    const token = this.jwtService.sign({ user });
+    return token;
+  }
+
   async signIn(loginDto: LoginDto) {
     const user = await this.userService.findByEmail(loginDto.email);
     if (!user) {
@@ -120,10 +145,9 @@ export class AuthService {
       );
     }
 
-    // Check if user has admin or client role only
-    // if (user.role !== 'ADMIN' && user.role !== 'CLIENT') {
-    //   throw new CustomUnauthorizedException('Only Admin and Client users can access this portal.');
-    // }
+    if (user.role !== 'ADMIN' && user.role !== 'CLIENT') {
+      throw new CustomUnauthorizedException('Only Admin and Client users can access this portal.');
+    }
 
     if (user.role === 'CLIENT' && user.companyId) {
       const company = await this.companyService.findOne(user.companyId);

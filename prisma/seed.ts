@@ -12,15 +12,15 @@ async function main() {
   try {
     const hashPassword = await argon2.hash('111111');
 
-    const companies = Array.from({ length: 10 }).map((_, i) => ({
-      name: `Company ${i + 1}`,
-      email: `company${i + 1}@example.com`,
-    }));
+    // const companies = Array.from({ length: 10 }).map((_, i) => ({
+    //   name: `Company ${i + 1}`,
+    //   email: `company${i + 1}@example.com`,
+    // }));
 
-    await prisma.company.createMany({
-      data: companies,
-      skipDuplicates: true,
-    });
+    // await prisma.company.createMany({
+    //   data: companies,
+    //   skipDuplicates: true,
+    // });
 
     const user = await prisma.user.upsert({
       where: {
@@ -34,7 +34,7 @@ async function main() {
       update: {},
     });
 
-    console.log('Seeded 10 companies + user:', user);
+    console.log('user:', user);
   } catch (error) {
     console.error('Error seeding database:', error);
     throw error;

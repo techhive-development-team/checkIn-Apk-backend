@@ -25,11 +25,11 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly companyService: CompanyService,
-  ) {}
+  ) { }
 
   @Get('google')
   @UseGuards(GoogleAuthGuard)
-  async googleAuth() {}
+  async googleAuth() { }
 
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
@@ -53,6 +53,14 @@ export class AuthController {
     @Body(new ValidationPipe()) loginDto: LoginDto,
   ): Promise<ApiResponse> {
     const token = await this.authService.signIn(loginDto);
+    return ApiResponse.success({ token });
+  }
+
+  @Post('employee/signIn')
+  async employeeSignIn(
+    @Body(new ValidationPipe()) loginDto: LoginDto,
+  ): Promise<ApiResponse> {
+    const token = await this.authService.employeeSignIn(loginDto);
     return ApiResponse.success({ token });
   }
 
