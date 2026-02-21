@@ -22,7 +22,7 @@ export class CompanyController {
   @UseGuards(JwtAuthGuard)
   @Get()
   async findAll(@Query() filterDto: CompanyFilterDto, @Req() req) {
-    if (req.user.role !== 'ADMIN') {
+    if (req.user.systemRole !== 'SUPER_ADMIN') {
       return ApiResponse.unauthorized('Only admins can access this resource');
     }
     const companies = await this.companyService.findAll(filterDto);
@@ -32,7 +32,7 @@ export class CompanyController {
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   async findOne(@Param('id') id: string, @Req() req) {
-    if (req.user.role == 'ADMIN' || (req.user.role == 'CLIENT' && req.user.companyId == id)) {
+    if (req.user.systemRole == 'SUPER_ADMIN' || (req.user.systemRole == 'COMPANY_OWNER' && req.user.companyId == id)) {
       const company = await this.companyService.findOne(id);
       return ApiResponse.success(company, 'Company retrieved successfully');
     }
@@ -46,7 +46,7 @@ export class CompanyController {
     @Body() updateCompanyDto: UpdateCompanyDto,
     @Req() req,
   ) {
-    if (req.user.role == 'ADMIN' || (req.user.role == 'CLIENT' && req.user.companyId == id)) {
+    if (req.user.systemRole == 'SUPER_ADMIN' || (req.user.systemRole == 'COMPANY_OWNER' && req.user.companyId == id)) {
       const company = await this.companyService.update(id, updateCompanyDto);
       return ApiResponse.success(company, 'Company updated successfully');
     }
@@ -56,7 +56,7 @@ export class CompanyController {
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async remove(@Param('id') id: string, @Req() req) {
-    if (req.user.role !== 'ADMIN') {
+    if (req.user.systemRole !== 'SUPER_ADMIN') {
       return ApiResponse.unauthorized('Only admins can access this resource');
     }
     const company = await this.companyService.remove(id);
@@ -66,7 +66,7 @@ export class CompanyController {
   @UseGuards(JwtAuthGuard)
   @Patch(':id/password-reset')
   async passwordReset(@Param('id') id: string, @Req() req) {
-    if (req.user.role !== 'ADMIN') {
+    if (req.user.systemRole !== 'SUPER_ADMIN') {
       return ApiResponse.unauthorized('You can only access your own company data');
     }
     const user = await this.companyService.passwordReset(id);

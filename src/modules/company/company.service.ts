@@ -6,7 +6,7 @@ import { CustomConflictException, CustomNotFoundException } from 'src/common/exc
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { UserService } from '../user/user.service';
-import { Role } from 'prisma/generated/enums';
+import { SystemRole } from 'prisma/generated/enums';
 import * as argon2 from 'argon2';
 import { randomBytes } from 'crypto';
 import { saveBase64Image } from 'src/common/store/image.upload';
@@ -56,7 +56,7 @@ export class CompanyService {
         data: {
           email: createCompanyDto.email,
           companyId: company.companyId,
-          role: Role.CLIENT,
+          systemRole: SystemRole.COMPANY_OWNER,
           password,
         },
       });
@@ -88,7 +88,7 @@ export class CompanyService {
           email: createCompanyDto.email,
           googleId,
           companyId: company.companyId,
-          role: Role.CLIENT,
+          systemRole: SystemRole.COMPANY_OWNER,
           password: null,
         },
       });
@@ -161,6 +161,7 @@ export class CompanyService {
       logoPath = saveBase64Image(updateCompanyDto.logo)
       updateCompanyDto.logo = logoPath;
     }
+    updateCompanyDto.totalEmployee = 0;
     return this.prisma.$transaction(async (tx) => {
       const updatedCompany = await tx.company.update({
         where: { companyId: id },
@@ -204,15 +205,24 @@ export class CompanyService {
       company.email,
       rawPassword
     );
+    const owner = await this.prisma.user.findFirst({
+      where: {
+        companyId: companyId,
+        systemRole: SystemRole.COMPANY_OWNER
+      }
+    });
+
+    if (!owner) throw new Error("Owner not found");
+
     const user = await this.prisma.user.update({
       where: {
-        companyId,
-        role: 'CLIENT'
+        userId: owner.userId
       },
       data: {
         password
       }
-    })
+    });
+
     return user;
   }
 

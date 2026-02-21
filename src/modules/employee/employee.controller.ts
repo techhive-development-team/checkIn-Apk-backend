@@ -16,10 +16,10 @@ export class EmployeeController {
     @Body() createEmployeeDto: CreateEmployeeDto,
     @Req() req
   ) {
-    if (req.user.role === 'ADMIN' || req.user.role === 'USER') {
+    if (req.user.systemRole === 'SUPER_ADMIN' || req.user.systemRole === 'USER') {
       return ApiResponse.unauthorized('Unuthorized');
     }
-    if (req.user.role == 'CLIENT' && req.user.companyId !== companyId) {
+    if (req.user.systemRole == 'COMPANY_OWNER' && req.user.companyId !== companyId) {
       return ApiResponse.unauthorized('Unuthorized');
     }
     const employee = await this.employeeService.createByCompanyId(companyId, createEmployeeDto);
@@ -34,17 +34,17 @@ export class EmployeeController {
     @Query('offset', new ParseIntPipe({ optional: true })) offset = 0,
     @Req() req
   ) {
-    if (req.user.role == 'CLIENT' && req.user.companyId !== companyId) {
+    if (req.user.systemRole == 'COMPANY_OWNER' && req.user.companyId !== companyId) {
       return ApiResponse.unauthorized('Unauthorized');
     }
-    if (req.user.role == 'USER') {
+    if (req.user.systemRole == 'USER') {
       return ApiResponse.unauthorized('Unauthorized');
     }
     let employees;
-    if (req.user.role == 'CLIENT') {
+    if (req.user.systemRole == 'COMPANY_OWNER') {
       employees = await this.employeeService.findByCompanyId({ companyId, limit, offset });
     }
-    if (req.user.role == 'ADMIN') {
+    if (req.user.systemRole == 'SUPER_ADMIN') {
       employees = await this.employeeService.findAll({ limit, offset });
     }
     return ApiResponse.success(employees, 'Employees retrieved successfully');
@@ -57,10 +57,10 @@ export class EmployeeController {
     @Param('employeeId') employeeId: string,
     @Req() req
   ) {
-    if (req.user.role == 'CLIENT' && req.user.companyId !== companyId) {
+    if (req.user.systemRole == 'COMPANY_OWNER' && req.user.companyId !== companyId) {
       return ApiResponse.unauthorized('Unauthorized');
     }
-    if (req.user.role == 'USER' && req.user.employeeId !== employeeId) {
+    if (req.user.systemRole == 'USER' && req.user.employeeId !== employeeId) {
       return ApiResponse.unauthorized('Unauthorized');
     }
     const employee = await this.employeeService.findOneByCompanyIdAndEmployeeId(companyId, employeeId);
@@ -75,10 +75,10 @@ export class EmployeeController {
     @Body() updateEmployeeDto: UpdateEmployeeDto,
     @Req() req
   ) {
-    if (req.user.role == 'CLIENT' && req.user.companyId !== companyId) {
+    if (req.user.systemRole == 'COMPANY_OWNER' && req.user.companyId !== companyId) {
       return ApiResponse.unauthorized('Unauthorized');
     }
-    if (req.user.role == 'USER' && req.user.employeeId !== employeeId) {
+    if (req.user.systemRole == 'USER' && req.user.employeeId !== employeeId) {
       return ApiResponse.unauthorized('Unauthorized');
     }
     const employee = await this.employeeService.update(companyId, employeeId, updateEmployeeDto);
@@ -92,7 +92,7 @@ export class EmployeeController {
     @Param('employeeId') employeeId: string,
     @Req() req
   ) {
-    if (req.user.role == 'CLIENT' && req.user.companyId !== companyId) {
+    if (req.user.systemRole == 'COMPANY_OWNER' && req.user.companyId !== companyId) {
       return ApiResponse.unauthorized('Unuthorized');
     }
     const employee = await this.employeeService.remove(companyId, employeeId);
@@ -105,7 +105,7 @@ export class EmployeeController {
     @Param('companyId') companyId: string,
     @Param('employeeId') employeeId: string,
     @Req() req) {
-    if (req.user.role == 'CLIENT' && req.user.companyId !== companyId) {
+    if (req.user.systemRole == 'COMPANY_OWNER' && req.user.companyId !== companyId) {
       return ApiResponse.unauthorized('Unuthorized');
     }
     const user = await this.employeeService.passwordReset(companyId, employeeId);

@@ -8,7 +8,7 @@ import { UserService } from '../user/user.service';
 import { saveBase64Image } from 'src/common/store/image.upload';
 import { randomBytes } from 'crypto';
 import * as argon2 from 'argon2';
-import { Role } from 'prisma/generated/enums';
+import { SystemRole } from 'prisma/generated/enums';
 import { EmployeeFilterDto } from './dto/filter-employee.dto';
 import { MailService } from '../mail/mail.service';
 
@@ -95,7 +95,7 @@ export class EmployeeService {
         data: {
           email: createEmployeeDto.email,
           employeeId: employee.employeeId,
-          role: Role.USER,
+          systemRole: SystemRole.USER,
           password: password,
         }
       })
@@ -222,7 +222,7 @@ export class EmployeeService {
     const user = await this.prisma.user.update({
       where: {
         employeeId,
-        role: 'USER'
+        systemRole: SystemRole.USER
       },
       data: {
         password

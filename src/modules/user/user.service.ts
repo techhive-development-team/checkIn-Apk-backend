@@ -3,7 +3,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma.service';
 import { CustomConflictException, CustomNotFoundException } from 'src/common/exceptions/custom.exceptions';
-import { Prisma, Role } from 'prisma/generated/client';
+import { Prisma, SystemRole } from 'prisma/generated/client';
 import { saveBase64Image } from 'src/common/store/image.upload';
 import * as argon2 from 'argon2';
 import { randomBytes } from 'crypto';
@@ -57,8 +57,7 @@ export class UserService {
         name: createUserDto.name,
         password: password,
         email: createUserDto.email,
-        logo: createUserDto.logo,
-        role: Role.ADMIN
+        systemRole: SystemRole.SUPER_ADMIN
       }
     })
 
@@ -83,7 +82,7 @@ export class UserService {
         skip: offset, where: {
           deletedAt: null,
           OR: [
-            { role: 'ADMIN' },
+            { systemRole: SystemRole.SUPER_ADMIN },
           ],
         },
         orderBy: { createdAt: 'desc' },
@@ -99,13 +98,11 @@ export class UserService {
       let name: string | null = null;
       let logo: string | null = null;
 
-      if (user.role === 'ADMIN') {
+      if (user.systemRole === SystemRole.SUPER_ADMIN) {
         name = user.name;
-        logo = user.logo;
       }
-      if (user.role === 'CLIENT') {
+      if (user.systemRole === SystemRole.COMPANY_OWNER) {
         name = user.company?.name || null;
-        logo = user.company?.logo || null;
       }
       return {
         ...user,
@@ -133,8 +130,16 @@ export class UserService {
   }
 
   async findByCompanyId(id: string) {
+    const owner = await this.prisma.user.findFirst({
+      where: {
+        companyId: id,
+        systemRole: SystemRole.COMPANY_OWNER
+      }
+    });
+
+    if (!owner) throw new Error("Owner not found");
     const user = await this.prisma.user.findUnique({
-      where: { companyId: id },
+      where: { userId: owner.userId },
     });
     if (!user) {
       throw new CustomNotFoundException(`User with this ID ${id} not found`);
@@ -162,11 +167,10 @@ export class UserService {
     }
     let name: string | null = null;
     let logo: string | null = null;
-    if (user.role === 'CLIENT') {
+    if (user.systemRole === SystemRole.USER) {
       name = user.company?.name || null;
       logo = user.company?.logo || null;
       user.name = name;
-      user.logo = logo;
     }
     return user;
   }
@@ -182,7 +186,6 @@ export class UserService {
       data: {
         name: updateUserDto.name,
         email: updateUserDto.email,
-        logo: updateUserDto.logo,
         status: updateUserDto.status
       },
       where: { userId: id }
@@ -202,9 +205,17 @@ export class UserService {
 
   async removeByCompanyId(id: string) {
     await this.findByCompanyId(id);
-    return this.prisma.user.update({
+    const owner = await this.prisma.user.findFirst({
       where: {
         companyId: id,
+        systemRole: SystemRole.COMPANY_OWNER
+      }
+    });
+
+    if (!owner) throw new Error("Owner not found");
+    return this.prisma.user.update({
+      where: {
+        userId: owner.userId,
       },
       data: {
         deletedAt: new Date()

@@ -28,8 +28,7 @@ export class UpdateCompanyDto extends PartialType(CreateCompanyDto) {
     email: string;
 
     @IsOptional()
-    @IsString()
-    totalEmployee: string;
+    totalEmployee: number;
 
     @IsString()
     @IsOptional()

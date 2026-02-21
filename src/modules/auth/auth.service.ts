@@ -76,7 +76,7 @@ export class AuthService {
     }
 
     // Check if user has admin or client role only
-    if (user.role !== 'ADMIN' && user.role !== 'CLIENT') {
+    if (user.systemRole !== 'SUPER_ADMIN' && user.systemRole !== 'COMPANY_OWNER') {
       throw new CustomUnauthorizedException(
         'Only Admin and Client users can access this portal.',
       );
@@ -111,7 +111,7 @@ export class AuthService {
 
   async employeeSignIn(loginDto: LoginDto) {
     const user = await this.userService.findByEmail(loginDto.email);
-    if (user?.role === 'ADMIN' || user?.role === 'CLIENT') {
+    if (user?.systemRole === 'SUPER_ADMIN' || user?.systemRole === 'COMPANY_OWNER') {
       throw new CustomUnauthorizedException('Only Employee can access this portal.');
     }
     if (!user) {
@@ -145,14 +145,13 @@ export class AuthService {
       );
     }
 
-    if (user.role !== 'ADMIN' && user.role !== 'CLIENT') {
-      throw new CustomUnauthorizedException('Only Admin and Client users can access this portal.');
+    if (user.systemRole !== 'SUPER_ADMIN' && user.systemRole !== 'COMPANY_OWNER') {
+      throw new CustomUnauthorizedException('Only Admin and COMPANY OWNER users can access this portal.');
     }
 
-    if (user.role === 'CLIENT' && user.companyId) {
+    if (user.systemRole === 'COMPANY_OWNER' && user.companyId) {
       const company = await this.companyService.findOne(user.companyId);
       user.name = company.name;
-      user.logo = company.logo;
     }
 
     const isPasswordValid = await argon2.verify(

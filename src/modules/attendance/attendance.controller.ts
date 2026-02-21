@@ -14,7 +14,7 @@ export class AttendanceController {
   @UseGuards(JwtAuthGuard)
   @Post()
   async create(@Body() createAttendanceDto: CreateAttendanceDto, @Req() req) {
-    if (req.user.role !== 'USER') {
+    if (req.user.systemRole !== 'USER') {
       return ApiResponse.unauthorized('Only users can create attendance records');
     }
     const attendance = await this.attendanceService.create(req.user.employeeId, createAttendanceDto);
@@ -84,7 +84,7 @@ export class AttendanceController {
     @Body() updateAttendanceDto: UpdateAttendanceDto,
     @Req() req
   ) {
-    if (req.user.role !== 'ADMIN') {
+    if (req.user.systemRole !== 'SUPER_ADMIN') {
       return ApiResponse.unauthorized('Only admins can update attendance records');
     }
     const attendance = await this.attendanceService.update(attendanceId, updateAttendanceDto);

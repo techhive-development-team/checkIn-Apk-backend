@@ -8,6 +8,28 @@ datasource db {
   provider = "postgresql"
 }
 
+//////////////////////////////////////////////////
+// ENUMS
+//////////////////////////////////////////////////
+
+enum SystemRole {
+  SUPER_ADMIN
+  COMPANY_OWNER
+  USER
+}
+
+enum PermissionAction {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+  EXPORT
+}
+
+//////////////////////////////////////////////////
+// COMPANY
+//////////////////////////////////////////////////
+
 model Company {
   companyId       String    @id @default(uuid())
   name            String
@@ -15,16 +37,37 @@ model Company {
   companyType     String?
   address         String?
   phone           String?
-  totalEmployee   String?
+  totalEmployee   Int?
   email           String    @unique
   subScribeStatus String    @default("Inactive")
   status          String    @default("active")
   createdAt       DateTime  @default(now())
   deletedAt       DateTime?
 
-  employees Employee[]
-  users     User[]
+  employees     Employee[]
+  users         User[]
+  roles         CompanyRole[]
+  workingTime   CompanyWorkingTime?
+  leavePolicies LeavePolicy[]
 }
+
+model CompanyWorkingTime {
+  id        String @id @default(uuid())
+  companyId String @unique
+
+  workStartTime DateTime @db.Time // 09:00
+  workEndTime   DateTime @db.Time // 17:00
+  graceMinutes  Int      @default(0) // 15 minutes allowed late
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
+}
+
+//////////////////////////////////////////////////
+// EMPLOYEE
+//////////////////////////////////////////////////
 
 model Employee {
   employeeId String    @id @default(uuid())
@@ -40,52 +83,140 @@ model Employee {
   createdAt  DateTime  @default(now())
   deletedAt  DateTime?
 
-  attendance Attendance[]
-  company    Company      @relation(fields: [companyId], references: [companyId])
-  user       User?
+  attendance    Attendance[]
+  company       Company        @relation(fields: [companyId], references: [companyId])
+  user          User?
+  leaveBalances LeaveBalance[]
+  leaveRequests LeaveRequest[]
 }
 
-model Attendance {
-  id               String    @id @default(uuid())
-  date             DateTime  @db.Date
-  checkInTime      DateTime
-  checkInPhoto     String?
-  checkInLocation  String?
-  checkOutTime     DateTime?
-  checkOutPhoto    String?
-  checkOutLocation String?
-  status           String    @default("present")
-  employeeId       String
-  createdAt        DateTime  @default(now())
-  deletedAt        DateTime?
-
-  employee Employee @relation(fields: [employeeId], references: [employeeId])
-}
-
-enum Role {
-  ADMIN
-  CLIENT
-  USER
-}
+//////////////////////////////////////////////////
+// SYSTEM USER (Login Account)
+//////////////////////////////////////////////////
 
 model User {
-  userId     String    @id @default(uuid())
+  userId     String     @id @default(uuid())
   name       String?
-  logo       String?
-  email      String    @unique
+  email      String     @unique
   password   String?
-  googleId   String?   @unique
-  role       Role      @default(USER)
-  status     String    @default("active")
-  companyId  String?   @unique
-  employeeId String?   @unique
-  createdAt  DateTime  @default(now())
-  deletedAt  DateTime?
+  googleId   String?    @unique
+  systemRole SystemRole @default(USER)
+  status     String     @default("active")
+
+  companyId  String?
+  employeeId String? @unique
+
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
 
   company  Company?  @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
   employee Employee? @relation(fields: [employeeId], references: [employeeId], onDelete: Cascade)
-  forgetPassword ForgetPassword?
+
+  forgetPassword   ForgetPassword?
+  companyUserRoles CompanyUserRole[]
 }
+
+//////////////////////////////////////////////////
+// COMPANY ROLE (HR, FINANCE, MANAGER, etc.)
+//////////////////////////////////////////////////
+
+model CompanyRole {
+  roleId    String   @id @default(uuid())
+  name      String // HR, FINANCE, MANAGER
+  companyId String
+  createdAt DateTime @default(now())
+
+  company     Company           @relation(fields: [companyId], references: [companyId])
+  users       CompanyUserRole[]
+  permissions RolePermission[]
+
+  @@unique([name, companyId])
+}
+
+//////////////////////////////////////////////////
+// ASSIGN ROLE TO USER
+//////////////////////////////////////////////////
+
+model CompanyUserRole {
+  id     String @id @default(uuid())
+  userId String
+  roleId String
+
+  user User        @relation(fields: [userId], references: [userId])
+  role CompanyRole @relation(fields: [roleId], references: [roleId])
+
+  @@unique([userId, roleId])
+}
+
+//////////////////////////////////////////////////
+// PERMISSION MASTER TABLE
+//////////////////////////////////////////////////
+
+model Permission {
+  permissionId String           @id @default(uuid())
+  module       String // EMPLOYEE, ATTENDANCE, PAYROLL
+  action       PermissionAction
+
+  rolePermissions RolePermission[]
+
+  @@unique([module, action])
+}
+
+//////////////////////////////////////////////////
+// ROLE-PERMISSION RELATION
+//////////////////////////////////////////////////
+
+model RolePermission {
+  id           String @id @default(uuid())
+  roleId       String
+  permissionId String
+
+  role       CompanyRole @relation(fields: [roleId], references: [roleId])
+  permission Permission  @relation(fields: [permissionId], references: [permissionId])
+
+  @@unique([roleId, permissionId])
+}
+
+//////////////////////////////////////////////////
+// ATTENDANCE
+//////////////////////////////////////////////////
+
+enum AttendanceStatus {
+  PRESENT
+  LATE
+  EARLY_LEAVE
+  OVERTIME
+  ABSENT
+  HALF_DAY
+}
+
+model Attendance {
+  id   String   @id @default(uuid())
+  date DateTime @db.Date
+
+  checkInTime  DateTime?
+  checkOutTime DateTime?
+
+  checkInPhoto  String?
+  checkOutPhoto String?
+
+  checkInLocation  String?
+  checkOutLocation String?
+
+  status AttendanceStatus @default(PRESENT)
+
+  employeeId String
+  createdAt  DateTime  @default(now())
+  deletedAt  DateTime?
+
+  employee Employee @relation(fields: [employeeId], references: [employeeId])
+
+  @@unique([employeeId, date]) // one attendance per day
+}
+
+//////////////////////////////////////////////////
+// FORGET PASSWORD
+//////////////////////////////////////////////////
 
 model ForgetPassword {
   userId    String   @id
@@ -93,4 +224,68 @@ model ForgetPassword {
   expiredAt DateTime
 
   user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+}
+
+enum LeaveTypeName {
+  CASUAL //6 days
+  ANNUAL // 10 days
+  MEDICAL // 30 days
+  PATERNITY
+  UNPAID
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+model LeavePolicy {
+  id          String        @id @default(uuid())
+  companyId   String
+  leaveType   LeaveTypeName
+  daysAllowed Int // e.g. 10 days annual, 7 sick, etc.
+  isPaid      Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  company       Company        @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
+  leaveBalance  LeaveBalance[]
+  leaveRequests LeaveRequest[]
+
+  @@unique([companyId, leaveType])
+}
+
+model LeaveBalance {
+  id            String @id @default(uuid())
+  employeeId    String
+  leavePolicyId String
+  year          Int
+  used          Int    @default(0)
+  remaining     Int // set from LeavePolicy.daysAllowed on init
+
+  employee    Employee    @relation(fields: [employeeId], references: [employeeId])
+  leavePolicy LeavePolicy @relation(fields: [leavePolicyId], references: [id])
+
+  @@unique([employeeId, leavePolicyId, year])
+}
+
+model LeaveRequest {
+  id            String      @id @default(uuid())
+  employeeId    String
+  leavePolicyId String
+  startDate     DateTime    @db.Date
+  endDate       DateTime    @db.Date
+  totalDays     Int
+  reason        String?
+  status        LeaveStatus @default(PENDING)
+  reviewedBy    String? // userId of approver
+  reviewedAt    DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  deletedAt     DateTime?
+
+  employee    Employee    @relation(fields: [employeeId], references: [employeeId])
+  leavePolicy LeavePolicy @relation(fields: [leavePolicyId], references: [id])
 }

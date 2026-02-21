@@ -87,10 +87,10 @@ export class AttendanceService {
     if (updateAttendanceDto.checkOutPhoto && updateAttendanceDto.checkOutPhoto !== undefined) {
       updateAttendanceDto.checkOutPhoto = saveBase64Image(updateAttendanceDto.checkOutPhoto);
     }
-    return this.prismaService.attendance.update({
-      where: { id: attendanceId },
-      data: updateAttendanceDto,
-    });
+    // return this.prismaService.attendance.update({
+    //   where: { id: attendanceId },
+    //   data: updateAttendanceDto,
+    // });
   }
 
   async remove(attendanceId: string, user: any) {
@@ -145,12 +145,12 @@ export class AttendanceService {
   private getWhereClause(user: any, attendanceId?: string) {
     const baseWhere: any = attendanceId ? { id: attendanceId } : {};
 
-    switch (user.role) {
+    switch (user.systemRole) {
       case 'USER':
         return { ...baseWhere, employeeId: user.employeeId };
-      case 'CLIENT':
+      case 'COMPANY_OWNER':
         return { ...baseWhere, employee: { companyId: user.companyId } };
-      case 'ADMIN':
+      case 'SUPER_ADMIN':
         return baseWhere;
       default:
         return baseWhere;
