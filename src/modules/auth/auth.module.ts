@@ -10,6 +10,7 @@ import { CompanyService } from '../company/company.service';
 import { JwtStrategy } from 'src/common/jwt/jwt.strategy';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { MailModule } from '../mail/mail.module';
+import { EmployeeService } from '../employee/employee.service';
 
 @Module({
   imports: [
@@ -28,6 +29,6 @@ import { MailModule } from '../mail/mail.module';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, GoogleStrategy, UserService, CompanyService, JwtStrategy],
+  providers: [AuthService, GoogleStrategy, UserService, CompanyService, JwtStrategy, EmployeeService],
 })
 export class AuthModule { }

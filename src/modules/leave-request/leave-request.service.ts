@@ -27,75 +27,62 @@ export class LeaveRequestService {
     });
   }
 
-  async findByAdmin(filters: { limit?: number; offset?: number }) {
-    const { limit = 10, offset = 0 } = filters;
-    const [data, total] = await this.prisma.$transaction([
-      this.prisma.leaveRequestData.findMany({
-        take: limit,
-        skip: offset,
-        include: { employee: true },
-        orderBy: { createdAt: 'desc' }
-      }),
-      this.prisma.leaveRequestData.count()
-    ]);
+  private buildWhereClause(filters: {
+    employeeId?: string;
+    companyId?: string;
+    fromDate?: string;
+    toDate?: string;
+  }) {
+    const { employeeId, companyId, fromDate, toDate } = filters;
     return {
-      data,
-      meta: {
-        total, limit, offset,
-        page: Math.floor(offset / limit) + 1,
-        totalPages: Math.ceil(total / limit),
-      }
-    }
+      ...(employeeId && { employeeId }),
+      ...(companyId && { employee: { companyId } }),
+      ...((fromDate || toDate) && {
+        createdAt: {
+          ...(fromDate && { gte: new Date(fromDate) }),
+          ...(toDate && { lte: new Date(toDate) }),
+        },
+      }),
+    };
   }
 
-  async findByCompany(filters: { companyId: string; limit?: number; offset?: number }) {
-    const { companyId, limit = 10, offset = 0 } = filters;
+  private async paginatedQuery(where: object, limit: number, offset: number) {
     const [data, total] = await this.prisma.$transaction([
       this.prisma.leaveRequestData.findMany({
+        where,
         take: limit,
         skip: offset,
         include: { employee: true },
-        where: {
-          employee: {
-            companyId: companyId
-          }
-        },
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
       }),
-      this.prisma.leaveRequestData.count({ where: { employee: { companyId } } })
+      this.prisma.leaveRequestData.count({ where }),
     ]);
+
     return {
       data,
       meta: {
-        total, limit, offset,
+        total,
+        limit,
+        offset,
         page: Math.floor(offset / limit) + 1,
         totalPages: Math.ceil(total / limit),
-      }
-    }
+      },
+    };
   }
 
-  async findByEmployee(filters: { employeeId: string; limit?: number; offset?: number }) {
-    const { employeeId, limit = 10, offset = 0 } = filters;
-    const [data, total] = await this.prisma.$transaction([
-      this.prisma.leaveRequestData.findMany({
-        take: limit,
-        skip: offset,
-        include: { employee: true },
-        where: {
-          employeeId: employeeId
-        },
-        orderBy: { createdAt: 'desc' }
-      }),
-      this.prisma.leaveRequestData.count({ where: { employeeId } })
-    ]);
-    return {
-      data,
-      meta: {
-        total, limit, offset,
-        page: Math.floor(offset / limit) + 1,
-        totalPages: Math.ceil(total / limit),
-      }
-    }
+  async findByAdmin(filters: { employeeId?: string; fromDate?: string; toDate?: string; limit?: number; offset?: number }) {
+    const { limit = 10, offset = 0, ...rest } = filters;
+    return this.paginatedQuery(this.buildWhereClause(rest), limit, offset);
+  }
+
+  async findByCompany(filters: { companyId: string; employeeId?: string; fromDate?: string; toDate?: string; limit?: number; offset?: number }) {
+    const { limit = 10, offset = 0, ...rest } = filters;
+    return this.paginatedQuery(this.buildWhereClause(rest), limit, offset);
+  }
+
+  async findByEmployee(filters: { employeeId: string; fromDate?: string; toDate?: string; limit?: number; offset?: number }) {
+    const { limit = 10, offset = 0, ...rest } = filters;
+    return this.paginatedQuery(this.buildWhereClause(rest), limit, offset);
   }
 
   async findOne(id: string) {
@@ -111,12 +98,17 @@ export class LeaveRequestService {
     return leave;
   }
 
-  update(id: number, updateLeaveRequestDto: UpdateLeaveRequestDto) {
-    return `This action updates a #${id} leaveRequest`;
+  async update(id: string, updateLeaveRequestDto: UpdateLeaveRequestDto) {
+    if (updateLeaveRequestDto.file) {
+      updateLeaveRequestDto.file = saveBase64Image(updateLeaveRequestDto.file)
+    }
+    return await this.prisma.leaveRequestData.update({
+      where: { id },
+      data: updateLeaveRequestDto
+    })
   }
 
   async remove(id: string) {
-    await this.findOne(id)
     return this.prisma.leaveRequestData.delete({ where: { id } });
   }
 }

@@ -13,12 +13,14 @@ import { PrismaService } from 'src/prisma.service';
 import { randomBytes } from 'crypto';
 import { ForgotPasswordDto } from './dto/forgotPwd.dto';
 import { PasswordResetDto } from './dto/pwdReset.dto';
+import { EmployeeService } from '../employee/employee.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private jwtService: JwtService,
     private companyService: CompanyService,
+    private employeeService: EmployeeService,
     private userService: UserService,
     private prisma: PrismaService,
     private readonly mailService: MailService,
@@ -149,6 +151,12 @@ export class AuthService {
       const company = await this.companyService.findOne(user.companyId);
       user.name = company.name;
       user.logo = company.logo;
+    }
+
+    if (user.role === 'USER' && user.employeeId) {
+      const employee = await this.employeeService.findOne(user.employeeId);
+      user.name = employee.firstName + " " + employee.lastName;
+      user.logo = employee.profilePic;
     }
 
     const isPasswordValid = await argon2.verify(

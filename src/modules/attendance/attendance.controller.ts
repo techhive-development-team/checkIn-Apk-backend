@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Req, UseGuards, Res, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Req, UseGuards, Res, Patch, Query, ParseIntPipe } from '@nestjs/common';
 import { AttendanceService } from './attendance.service';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { UpdateAttendanceDto } from './dto/update-attendance.dto';
@@ -6,6 +6,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ApiResponse } from 'src/common/exceptions/api-response';
 import * as ExcelJS from 'exceljs';
 import type { Response } from 'express';
+import { CustomUnauthorizedException } from 'src/common/exceptions/custom.exceptions';
 
 @Controller('attendance')
 export class AttendanceController {
@@ -30,15 +31,33 @@ export class AttendanceController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  async findAll(@Req() req) {
-    const attendances = await this.attendanceService.findAll({user: req.user},);
-    return ApiResponse.success(attendances, 'Attendance records retrieved successfully');
+  async findAll(
+    @Req() req,
+    @Query('fromDate') fromDate?: string,
+    @Query('toDate') toDate?: string,
+    @Query('employeeId') employeeId?: string,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 10,
+    @Query('offset', new ParseIntPipe({ optional: true })) offset: number = 0,
+  ) {
+    const attendances = await this.attendanceService.findAll({
+      user: req.user,
+      fromDate,
+      toDate,
+      employeeId,
+      limit,
+      offset,
+    });
+
+    return ApiResponse.success(
+      attendances,
+      'Attendance records retrieved successfully'
+    );
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('/export')
   async export(@Req() req, @Res() res: Response): Promise<void> {
-    const attendances = (await this.attendanceService.findAll({user: req.user})) ?? [];
+    const attendances = (await this.attendanceService.findAll({ user: req.user })) ?? [];
 
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Sheet1');
@@ -84,11 +103,10 @@ export class AttendanceController {
     @Body() updateAttendanceDto: UpdateAttendanceDto,
     @Req() req
   ) {
-    if (req.user.role !== 'ADMIN') {
-      return ApiResponse.unauthorized('Only admins can update attendance records');
-    }
-    const attendance = await this.attendanceService.update(attendanceId, updateAttendanceDto);
-    return ApiResponse.success(attendance, 'Attendance updated successfully');
+    const attendance = await this.attendanceService.findOne(attendanceId, req.user);
+    this.authorizeUpdateAndDelete(attendance, req.user)
+    const updatedAttendance = await this.attendanceService.update(attendanceId, updateAttendanceDto);
+    return ApiResponse.success(updatedAttendance, 'Attendance updated successfully');
   }
 
   @UseGuards(JwtAuthGuard)
@@ -97,14 +115,26 @@ export class AttendanceController {
     @Param('attendanceId') attendanceId: string,
     @Req() req) {
     const attendance = await this.attendanceService.findOne(attendanceId, req.user);
+    this.authorizeUpdateAndDelete(attendance, req.user)
     return ApiResponse.success(attendance, 'Attendance retrieved successfully');
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':attendanceId')
   async remove(@Param('attendanceId') attendanceId: string, @Req() req) {
-    const attendance = await this.attendanceService.remove(attendanceId, req.user);
-    return ApiResponse.success(attendance, 'Attendance deleted successfully');
+    const attendance = await this.attendanceService.findOne(attendanceId, req.user);
+    this.authorizeUpdateAndDelete(attendance, req.user)
+    const attendanceToDelete = await this.attendanceService.remove(attendanceId, req.user);
+    return ApiResponse.success(attendanceToDelete, 'Attendance deleted successfully');
+  }
+
+  private authorizeUpdateAndDelete(attendance, user) {
+    if (user.role === 'CLIENT' && attendance.employee.companyId !== user.companyId) {
+      throw new CustomUnauthorizedException('You are not allowed to access this attendance request');
+    }
+    if (user.role === 'USER' && attendance.employeeId !== user.employeeId) {
+      throw new CustomUnauthorizedException('You are not allowed to access this attendance request');
+    }
   }
 
 }

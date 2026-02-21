@@ -24,10 +24,44 @@ export class AttendanceService {
     }
   }
 
-  async findAll(filters?: { user?: any; limit?: number; offset?: number }) {
-    const { user, limit = 10, offset = 0 } = filters || {};
-    console.log(user)
-    const whereClause = await this.getWhereClause(user);
+  async findAll(filters?: {
+    user?: any;
+    fromDate?: string;
+    toDate?: string;
+    employeeId?: string;
+    limit?: number;
+    offset?: number;
+  }) {
+    const {
+      user,
+      fromDate,
+      toDate,
+      employeeId,
+      limit = 10,
+      offset = 0,
+    } = filters || {};
+
+    const baseWhere = await this.getWhereClause(user);
+
+    const whereClause: any = {
+      ...baseWhere,
+    };
+
+    if (employeeId) {
+      whereClause.employeeId = employeeId;
+    }
+
+    if (fromDate || toDate) {
+      whereClause.createdAt = {};
+
+      if (fromDate) {
+        whereClause.createdAt.gte = new Date(fromDate);
+      }
+
+      if (toDate) {
+        whereClause.createdAt.lte = new Date(toDate);
+      }
+    }
 
     const [data, total] = await this.prismaService.$transaction([
       this.prismaService.attendance.findMany({
@@ -36,8 +70,10 @@ export class AttendanceService {
         take: limit,
         orderBy: { createdAt: 'desc' },
         include: {
-          employee: { include: { company: true } },
-        }
+          employee: {
+            include: { company: true },
+          },
+        },
       }),
       this.prismaService.attendance.count({
         where: whereClause,
@@ -56,7 +92,6 @@ export class AttendanceService {
     };
   }
 
-
   async getUserTodayAttendanceStatus(employeeId: string) {
     const today = this.getTodayRange();
     const attendance = await this.prismaService.attendance.findFirst({
@@ -69,9 +104,10 @@ export class AttendanceService {
   }
 
   findOne(attendanceId: string, user: any) {
-    const whereClause = this.getWhereClause(user, attendanceId);
     const attendance = this.prismaService.attendance.findUnique({
-      where: whereClause,
+      where: {
+        id: attendanceId
+      },
       include: { employee: { include: { company: true } } },
     });
     if (!attendance) {
@@ -142,9 +178,8 @@ export class AttendanceService {
     });
   }
 
-  private getWhereClause(user: any, attendanceId?: string) {
-    const baseWhere: any = attendanceId ? { id: attendanceId } : {};
-
+  private getWhereClause(user: any) {
+    const baseWhere: any = {};
     switch (user.role) {
       case 'USER':
         return { ...baseWhere, employeeId: user.employeeId };
