@@ -22,8 +22,69 @@ model Company {
   createdAt       DateTime  @default(now())
   deletedAt       DateTime?
 
-  employees Employee[]
-  users     User[]
+  employees    Employee[]
+  users        User[]
+  companyRoles CompanyRole[]
+
+  companyWorkingTime CompanyWorkingTime?
+}
+
+model CompanyWorkingTime {
+  id        String @id @default(uuid())
+  companyId String @unique
+
+  workStartTime DateTime @db.Time
+  workEndTime   DateTime @db.Time
+  graceMinutes  Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
+}
+
+model CompanyRole {
+  roleId    String   @id @default(uuid())
+  name      String
+  companyId String
+  createdAt DateTime @default(now())
+
+  company     Company           @relation(fields: [companyId], references: [companyId])
+  users       CompanyUserRole[]
+  permissions RolePermission[]
+
+  @@unique([name, companyId])
+}
+
+model CompanyUserRole {
+  id     String @id @default(uuid())
+  userId String
+  roleId String
+
+  user User        @relation(fields: [userId], references: [userId])
+  role CompanyRole @relation(fields: [roleId], references: [roleId])
+
+  @@unique([userId, roleId])
+}
+
+model Permission {
+  permissionId String @id @default(uuid())
+  module       String
+
+  rolePermissions RolePermission[]
+
+  @@unique([module])
+}
+
+model RolePermission {
+  id           String @id @default(uuid())
+  roleId       String
+  permissionId String
+
+  role       CompanyRole @relation(fields: [roleId], references: [roleId])
+  permission Permission  @relation(fields: [permissionId], references: [permissionId])
+
+  @@unique([roleId, permissionId])
 }
 
 model Employee {
@@ -82,9 +143,10 @@ model User {
   createdAt  DateTime  @default(now())
   deletedAt  DateTime?
 
-  company  Company?  @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
-  employee Employee? @relation(fields: [employeeId], references: [employeeId], onDelete: Cascade)
-  forgetPassword ForgetPassword?
+  company          Company?          @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
+  employee         Employee?         @relation(fields: [employeeId], references: [employeeId], onDelete: Cascade)
+  forgetPassword   ForgetPassword?
+  companyUserRoles CompanyUserRole[]
 }
 
 model ForgetPassword {
