@@ -145,10 +145,6 @@ export class AuthService {
       );
     }
 
-    if (user.role !== 'ADMIN' && user.role !== 'CLIENT') {
-      throw new CustomUnauthorizedException('Only Admin and Client users can access this portal.');
-    }
-
     if (user.role === 'CLIENT' && user.companyId) {
       const company = await this.companyService.findOne(user.companyId);
       user.name = company.name;

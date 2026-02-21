@@ -14,6 +14,7 @@ import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { EmployeeModule } from './modules/employee/employee.module';
 import { CompanyModule } from './modules/company/company.module';
+import { LeaveRequestModule } from './modules/leave-request/leave-request.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { CompanyModule } from './modules/company/company.module';
     EmployeeModule,
     CompanyModule,
     AttendanceModule,
+    LeaveRequestModule,
   ],
   controllers: [AppController],
   providers: [
